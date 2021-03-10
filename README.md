@@ -5,7 +5,7 @@ This is Jack's history, a chubby lad who is keen on playing Blackjack. In other 
 
 1. Basic game logic: a multi-player blackjack game that only allows hitting and standing (game.py).
 
-2. Interface: a ready-to-puse terminal executable interface (bash_interface.py).
+2. Interface: a ready-to-use terminal executable interface (bash_interface.py).
 
 In progress:
 
