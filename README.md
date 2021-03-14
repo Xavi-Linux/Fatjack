@@ -13,3 +13,6 @@ I am delving into:
 	
 	- Markov Decision Processes
 	- Dynamic programming
+	- MC vs TD
+	- Model Prediction
+	- Model Control
