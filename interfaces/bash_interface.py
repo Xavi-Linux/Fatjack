@@ -1,5 +1,6 @@
+#import sys
+#sys.path.insert(1, '/home/xavi/Documents/Blackjack/games/blackjacks.py')
 from games import blackjacks as game
-
 
 def setup_game():
     game_error = True
@@ -132,8 +133,7 @@ def execute_game(match):
             print(message)
 
 
-if __name__ == '__main__':
-
+def run():
     print('Welcome to Blackjack!')
     bj = setup_game()
     print('\nFine!\n\t- Number of players is {0}\n\t- Number of decks is {1}'.format(bj.numplayers, bj.numdecks))
@@ -145,5 +145,10 @@ if __name__ == '__main__':
     while not stop:
         execute_game(bj)
         answer = input('Do you want to play again? (y/n) ')
-        if answer == 'n':
+        if answer=='n':
             stop = True
+
+
+if __name__ == '__main__':
+
+    run()
