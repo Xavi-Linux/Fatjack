@@ -1,4 +1,4 @@
-from blackjack import HitStand
+from .blackjack import HitStand
 
 
 def make(environment_name):

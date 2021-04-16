@@ -56,8 +56,37 @@ class HitStand(BaseEnvironment):
 
         self.__game_instance = None
         self.verbose = False
-        self.current_state = None
+        self.current_state = []
 
+    def __conditional_decorator(func):
+        def wrapper(self,*args):
+            values = func(self, *args)
+            if self.verbose:
+                if self.current_state[0]:
+                    print('{}:'.format(self.__NAME))
+                    print('\t-Cards: {0}'.format(self.current_state[3][0]))
+                    print('\t-Value : {0}'.format(self.current_state[1][0]))
+                    print('Dealer:')
+                    print('\t-Cards: {0}'.format(self.current_state[3][1]))
+                    print('\t-Value : {0}'.format(self.current_state[1][1]))
+
+                else:
+                    print('{0} decides to: {1}'.format(self.__NAME, self.current_state[5].upper()))
+                    print('\t-Cards: {0}'.format(self.current_state[3][0]))
+                    print('\t-Value : {0}'.format(self.current_state[1][0]))
+
+                if self.current_state[2]:
+                    print('Dealer:')
+                    print('\t-Cards: {0}'.format(self.current_state[3][1]))
+                    print('\t-Value : {0}'.format(self.current_state[1][1]))
+                    print(self.current_state[4].upper())
+                    self.verbose = False
+
+            self.current_state = []
+            return values
+        return wrapper
+
+    @__conditional_decorator
     def reset(self):
         self.__game_instance = Blackjack(self.__NUM_DECKS, self.__NUM_PLAYERS)
         self.__game_instance.setup_players([{'name': self.__NAME,
@@ -73,6 +102,7 @@ class HitStand(BaseEnvironment):
                       self.__game_instance.croupier_hand.best_value
         done = len(self.__game_instance.retrieve_hands_alive()) == 0
         info = self.__game_instance.players[0].current_hand.card_names, self.__game_instance.croupier_hand.card_names
+        message = None
         if not done:
             reward = 0
         else:
@@ -81,11 +111,14 @@ class HitStand(BaseEnvironment):
 
             observation = self.__game_instance.alive_players[0].current_hand.best_value, \
                           self.__game_instance.croupier_hand.best_value
-            self.__game_instance.resolve_round(self.__game_instance.players[0])
+            message = self.__game_instance.resolve_round(self.__game_instance.players[0])
             reward = self.__game_instance.players[0].gains
+
+        self.current_state.extend((True, observation, done, info, message))
 
         return observation, reward, done, info
 
+    @__conditional_decorator
     def step(self, action:int):
         if self.__game_instance:
             self.__game_instance.send_action(self.__game_instance.alive_players[0],self.action_space_description[action])
@@ -95,6 +128,7 @@ class HitStand(BaseEnvironment):
             done = len(self.__game_instance.retrieve_hands_alive())==0
             info = self.__game_instance.players[
                        0].current_hand.card_names, self.__game_instance.croupier_hand.card_names
+            message = None
             if not done:
                 reward = 0
             else:
@@ -103,8 +137,10 @@ class HitStand(BaseEnvironment):
 
                 observation = self.__game_instance.alive_players[0].current_hand.best_value,\
                               self.__game_instance.croupier_hand.best_value
-                self.__game_instance.resolve_round(self.__game_instance.players[0])
+                message = self.__game_instance.resolve_round(self.__game_instance.players[0])
                 reward = self.__game_instance.players[0].gains
+
+            self.current_state.extend((False, observation, done, info, message, self.action_space_description[action]))
 
             return observation, reward, done, info
 
@@ -113,24 +149,8 @@ class HitStand(BaseEnvironment):
     def render(self):
         self.verbose = True
 
-    def conditional_decorator(self):
-        pass
 
 
-if __name__ == '__main__':
-
-    env = HitStand()
-    for i in range(10_0000):
-        state, r, terminal, state_info = env.reset()
-        print('EPISODE {}:'.format(i+1), '\n')
-        print('initial state: {0}, {1}, {2}, {3}'.format(state, r, terminal, state_info), '\n')
-        j=0
-        while not terminal:
-            action = 0 if np.random.uniform() < .5 else 1
-            print(action)
-            state, r, terminal, state_info = env.step(action)
-            print('--> step {4}: {0}, {1}, {2}, {3}'.format(state, r, terminal, state_info, j+1), '\n')
-        print('-------------','\n')
 
 
 
