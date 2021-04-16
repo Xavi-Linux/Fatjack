@@ -1,6 +1,5 @@
-#import sys
-#sys.path.insert(1, '/home/xavi/Documents/Blackjack/games/blackjacks.py')
 from games import blackjacks as game
+
 
 def setup_game():
     game_error = True
