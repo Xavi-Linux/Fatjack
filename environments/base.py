@@ -1,24 +1,8 @@
+from blackjack import HitStand
+
 
 def make(environment_name):
-    pass
+    if environment_name == 'hitstand':
+        return HitStand()
 
-
-class BaseEnvironment:
-
-    def __init__(self):
-        pass
-
-    def reset(self):
-        pass
-
-    def step(self, action):
-        pass
-
-    def render(self):
-        pass
-
-    def close(self):
-        pass
-
-    def seed(self):
-        pass
+    return None
