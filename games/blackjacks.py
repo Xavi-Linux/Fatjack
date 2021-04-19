@@ -235,6 +235,7 @@ class Hand:
 
         self.locked = False
         self.is_croupier = croupier
+        self.__is_soft = False
         self.__adjust_aces()
 
     @property
@@ -280,6 +281,9 @@ class Hand:
         j=0
         for i, name in enumerate(self.card_names):
             if name.startswith('A'):
+                if i < 2:
+                    self.__is_soft = True
+
                 j+=1
                 if j > 1:
                     self.card_values[i] = 1
@@ -294,6 +298,10 @@ class Hand:
                     return self.maxvalue
 
             return self.minvalue
+
+    @property
+    def is_soft(self):
+        return self.__is_soft
 
     def __str__(self):
         return 'Cards: {0}\n Min. value: {1}\n Max. Value: {2}'.format(' '.join(self.card_names),

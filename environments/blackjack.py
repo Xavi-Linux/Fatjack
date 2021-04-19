@@ -47,12 +47,21 @@ class HitStand(BaseEnvironment):
                                          }
         self.action_space_len = len(self.action_space)
 
-        self.rewards_space = np.array([-1, 0, 1, 1.5])
-        self.rewards_space_description = {-1: 'The House beats {0}'.format(self.__NAME),
+        self.reward_space = np.array([-1, 0, 1, 1.5])
+        self.reward_space_description = {-1: 'The House beats {0}'.format(self.__NAME),
                                            0: 'Draw/not terminal',
                                            1: '{0} beats the House'.format(self.__NAME),
                                           1.5: 'Blackjack for {0}'.format(self.__NAME)
                                           }
+        self.rewards_space_len = len(self.reward_space)
+
+        self.observation_space_len = 3
+        self.observation_space_description = {0: "Player's total",
+                                              1: "Dealer's card value",
+                                              2: "Player has got usable ace"
+                                              }
+        self.observation_space_low = np.array([4, 2, 0])
+        self.observation_space_high = np.array([30, 26, 1])
 
         self.__game_instance = None
         self.verbose = False
@@ -99,7 +108,8 @@ class HitStand(BaseEnvironment):
         self.__game_instance.start_round()
 
         observation = self.__game_instance.alive_players[0].current_hand.best_value,\
-                      self.__game_instance.croupier_hand.best_value
+                      self.__game_instance.croupier_hand.best_value,\
+                      int(self.__game_instance.alive_players[0].current_hand.is_soft)
         done = len(self.__game_instance.retrieve_hands_alive()) == 0
         info = self.__game_instance.players[0].current_hand.card_names, self.__game_instance.croupier_hand.card_names
         message = None
@@ -110,7 +120,8 @@ class HitStand(BaseEnvironment):
                 self.__game_instance.get_croupier_hand()
 
             observation = self.__game_instance.alive_players[0].current_hand.best_value, \
-                          self.__game_instance.croupier_hand.best_value
+                          self.__game_instance.croupier_hand.best_value, \
+                          int(self.__game_instance.alive_players[0].current_hand.is_soft)
             message = self.__game_instance.resolve_round(self.__game_instance.players[0])
             reward = self.__game_instance.players[0].gains
 
@@ -124,7 +135,8 @@ class HitStand(BaseEnvironment):
             self.__game_instance.send_action(self.__game_instance.alive_players[0],self.action_space_description[action])
 
             observation = self.__game_instance.players[0].current_hand.best_value,\
-                          self.__game_instance.croupier_hand.best_value
+                          self.__game_instance.croupier_hand.best_value, \
+                          int(self.__game_instance.players[0].current_hand.is_soft)
             done = len(self.__game_instance.retrieve_hands_alive())==0
             info = self.__game_instance.players[
                        0].current_hand.card_names, self.__game_instance.croupier_hand.card_names
@@ -136,7 +148,8 @@ class HitStand(BaseEnvironment):
                     self.__game_instance.get_croupier_hand()
 
                 observation = self.__game_instance.alive_players[0].current_hand.best_value,\
-                              self.__game_instance.croupier_hand.best_value
+                              self.__game_instance.croupier_hand.best_value,\
+                              int(self.__game_instance.alive_players[0].current_hand.is_soft)
                 message = self.__game_instance.resolve_round(self.__game_instance.players[0])
                 reward = self.__game_instance.players[0].gains
 
