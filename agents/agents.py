@@ -9,8 +9,7 @@ class Agent:
 
     __TABLE_TYPES = ('v', 'q')
     __INIT_TYPES = ('random', 'null')
-    __TABLES_Dir = '../tables/'
-    __TABLES_file = 'BaseAgent_'
+    __TABLES_Dir = 'tables/'
 
     def __init__(self, environment, table_type='v', table_init='random'):
         self.environment = environment
@@ -46,17 +45,21 @@ class Agent:
 
         self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
 
-    def load_table(self):
+        self.save_at_episodes = []
+
+    def load_table(self, episode, overwrite=False):
         pass
 
     def save_table(self, episode, filename=None):
         if filename is None:
-            filename = self.__TABLES_Dir + self.__TABLES_file + str(episode) +'_'+\
+            filename = self.__TABLES_Dir + self.__class__.__name__ + '_' + str(episode) +'_'+\
                        str(datetime.now().strftime('%Y%m%d_%H%M'))
 
         path = abspath(filename)
         with open(path, 'wb') as f:
             pickle.dump(self.table, f)
+
+        self.save_at_episodes.append(episode)
 
     def table_look_up(self, observation):
         observation = np.array(observation)
@@ -107,12 +110,13 @@ class MonteCarloPredictor(Agent):
                 self.current_episode_steps[0]['reward'],
                 self.time_steps_counter[self.current_episode_steps[0]['observation']])
         else:
-            for time_step in range(len(self.current_episode_steps)-1, 0, -1):
-                pass
-
-    def follow_policy(self):
-        action = np.random.randint(0,self.environment.action_space_len)
-        return action
+            for time_step in range(len(self.current_episode_steps)-2, -1, -1):
+                reward = self.current_episode_steps[time_step + 1]['reward'] + self.hyperparams['discount_rate'] * accum_discounted_reward
+                self.time_steps_counter[self.current_episode_steps[time_step]['observation']] += 1
+                self.table[self.current_episode_steps[time_step]['observation']] = self.incremental_average(
+                    self.table[self.current_episode_steps[time_step]['observation']],
+                    reward,
+                    self.time_steps_counter[self.current_episode_steps[time_step]['observation']])
 
 
 if __name__ == '__main__':
@@ -120,6 +124,7 @@ if __name__ == '__main__':
     env = HitStand()
     agent = MonteCarloPredictor(env)
     obs, _, _, _ = env.reset()
+    print(type(agent).__name__)
 
 
 
