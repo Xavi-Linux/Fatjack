@@ -11,7 +11,7 @@ class ResetEnvironmentError(BaseException):
 class BaseEnvironment:
 
     def __init__(self):
-        pass
+        self.is_discrete = True
 
     def reset(self):
         pass
