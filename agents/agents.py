@@ -47,7 +47,7 @@ class Agent:
 
         self.save_at_episodes = []
 
-    def load_table(self, episode, overwrite=False):
+    def load_table(self, episode, overwrite=False, most_recent=True, filename=None):
         pass
 
     def save_table(self, episode, filename=None):
