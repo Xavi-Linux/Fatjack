@@ -2,14 +2,25 @@ import numpy as np
 from environments.base import HitStand
 import pickle
 from datetime import datetime
-from os.path import curdir, join, abspath
+from pathlib import Path
+from os.path import getctime
+
+
+def folderpath_search(origin:Path, sought_folder:str)->Path:
+    for element in origin.iterdir():
+        if element.is_dir():
+            if element.name == sought_folder:
+                return Path(element)
+
+    return folderpath_search(origin.parent, sought_folder)
 
 
 class Agent:
 
     __TABLE_TYPES = ('v', 'q')
     __INIT_TYPES = ('random', 'null')
-    __TABLES_Dir = 'tables/'
+    __Tables = 'tables'
+    __TABLES_Dir = folderpath_search(Path.cwd(), __Tables)
 
     def __init__(self, environment, table_type='v', table_init='random'):
         self.environment = environment
@@ -44,18 +55,43 @@ class Agent:
                                                 [self.environment.action_space_len]))
 
         self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
-
         self.save_at_episodes = []
+        self.current_table_path = ''
 
-    def load_table(self, episode, overwrite=False):
-        pass
+    def load_table(self, episode=None, overwrite=False, most_recent=True, filename=None):
+        if filename is None:
+            if most_recent:
+                criteria = self.__class__.__name__ + '_*'
+            else:
+                if episode:
+                    criteria = self.__class__.__name__ + '_' + str(episode) + '_*'
+                else:
+                    raise Exception('Episode number must be specified when most_recent is False')
+            try:
+                path = sorted(self.__TABLES_Dir.glob(criteria), key=getctime, reverse=True)[0]
+
+            except IndexError:
+                raise Exception('No file found by following the desired criteria')
+
+        else:
+            path = self.__TABLES_Dir.joinpath(filename)
+
+        with open(path, 'rb') as f:
+            table = pickle.load(f)
+
+        if overwrite:
+            self.table = table
+            self.current_table_path = path
+        else:
+            return table
 
     def save_table(self, episode, filename=None):
         if filename is None:
-            filename = self.__TABLES_Dir + self.__class__.__name__ + '_' + str(episode) +'_'+\
-                       str(datetime.now().strftime('%Y%m%d_%H%M'))
+            path = self.__TABLES_Dir.joinpath(self.__class__.__name__ + '_' + str(episode) +'_'+
+                                              str(datetime.now().strftime('%Y%m%d_%H%M')))
+        else:
+            path = self.__TABLES_Dir.joinpath(filename)
 
-        path = abspath(filename)
         with open(path, 'wb') as f:
             pickle.dump(self.table, f)
 
@@ -82,6 +118,9 @@ class Agent:
 
     def follow_policy(self, *args):
         raise NotImplemented
+
+    def list_saved_tables(self):
+        return list(map(str, self.__TABLES_Dir.glob(self.__class__.__name__ + '_*')))
 
 
 class MonteCarloPredictor(Agent):
@@ -123,8 +162,7 @@ if __name__ == '__main__':
 
     env = HitStand()
     agent = MonteCarloPredictor(env)
-    obs, _, _, _ = env.reset()
-    print(type(agent).__name__)
-
+    tab = agent.load_table(most_recent=True, overwrite=False)
+    print(agent.list_saved_tables())
 
 
