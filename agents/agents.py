@@ -2,7 +2,14 @@ import numpy as np
 from environments.base import HitStand
 import pickle
 from datetime import datetime
-from os.path import curdir, join, abspath
+from os.path import abspath
+from pathlib import Path
+
+__VAR = 'tables/'
+
+
+def folderpath_search(folder):
+    return Path.cwd()
 
 
 class Agent:
@@ -121,10 +128,7 @@ class MonteCarloPredictor(Agent):
 
 if __name__ == '__main__':
 
-    env = HitStand()
-    agent = MonteCarloPredictor(env)
-    obs, _, _, _ = env.reset()
-    print(type(agent).__name__)
+    print(folderpath_search('a'))
 
 
 
