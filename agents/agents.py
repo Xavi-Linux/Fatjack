@@ -2,21 +2,24 @@ import numpy as np
 from environments.base import HitStand
 import pickle
 from datetime import datetime
-from os.path import abspath
 from pathlib import Path
 
-__VAR = 'tables/'
 
+def folderpath_search(origin:Path, sought_folder:str)->Path:
+    for element in origin.iterdir():
+        if element.is_dir():
+            if element.name == sought_folder:
+                return Path(element)
 
-def folderpath_search(folder):
-    return Path.cwd()
+    return folderpath_search(origin.parent, sought_folder)
 
 
 class Agent:
 
     __TABLE_TYPES = ('v', 'q')
     __INIT_TYPES = ('random', 'null')
-    __TABLES_Dir = 'tables/'
+    __Tables = 'tables'
+    __TABLES_Dir = folderpath_search(Path.cwd(), __Tables)
 
     def __init__(self, environment, table_type='v', table_init='random'):
         self.environment = environment
@@ -59,10 +62,10 @@ class Agent:
 
     def save_table(self, episode, filename=None):
         if filename is None:
-            filename = self.__TABLES_Dir + self.__class__.__name__ + '_' + str(episode) +'_'+\
-                       str(datetime.now().strftime('%Y%m%d_%H%M'))
+            filename = self.__TABLES_Dir.joinpath(self.__class__.__name__ + '_' + str(episode) +'_'+
+                                                  str(datetime.now().strftime('%Y%m%d_%H%M')))
 
-        path = abspath(filename)
+        path = Path(filename)
         with open(path, 'wb') as f:
             pickle.dump(self.table, f)
 
@@ -128,7 +131,4 @@ class MonteCarloPredictor(Agent):
 
 if __name__ == '__main__':
 
-    print(folderpath_search('a'))
-
-
-
+    pass
