@@ -157,6 +157,8 @@ class MonteCarloPredictor(Agent):
                     reward,
                     self.time_steps_counter[self.current_episode_steps[time_step]['observation']])
 
+                accum_discounted_reward = reward
+
 
 if __name__ == '__main__':
 
