@@ -371,8 +371,14 @@ class Blackjack:
             player.current_hand.append_card(self.__deck.pick_random_card())
 
     def get_croupier_hand(self):
+        if all(map(lambda h:h.current_hand.is_blackjack, self.alive_players)) and self.croupier_hand.best_value < 10:
+            return self.croupier_hand
+
         while not self.croupier_hand.is_over_17:
             self.croupier_hand.append_card(self.__deck.pick_random_card())
+            if all(map(lambda h: h.current_hand.is_blackjack, self.alive_players)) and\
+               not self.croupier_hand.is_blackjack:
+                break
 
         return self.croupier_hand
 
@@ -394,6 +400,10 @@ class Blackjack:
             return '{0} beats the House'.format(player.name)
 
         if player.current_hand.best_value < self.croupier_hand.best_value:
+            player.change_state('defeat')
+            return 'The House beats {0}'.format(player.name)
+
+        if not player.current_hand.is_blackjack and self.croupier_hand.is_blackjack:
             player.change_state('defeat')
             return 'The House beats {0}'.format(player.name)
 
