@@ -57,6 +57,7 @@ class Agent:
         self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
         self.save_at_episodes = []
         self.current_table_path = ''
+        self.num_executed_episodes = 0
 
     def load_table(self, episode=None, overwrite=False, most_recent=True, filename=None):
         if filename is None:
@@ -86,6 +87,7 @@ class Agent:
             return table
 
     def save_table(self, episode, filename=None):
+        episode += self.num_executed_episodes
         if filename is None:
             path = self.__TABLES_Dir.joinpath(self.__class__.__name__ + '_' + str(episode) +'_'+
                                               str(datetime.now().strftime('%Y%m%d_%H%M')))
@@ -139,6 +141,7 @@ class MonteCarloPredictor(Agent):
         if terminal:
             self.update_table()
             self.current_episode_steps = {}
+            self.num_executed_episodes +=1
 
     def update_table(self):
         accum_discounted_reward = 0
@@ -194,13 +197,16 @@ if __name__ == '__main__':
 
     class RandomPolicyAgent(MonteCarloPredictor):
 
-        def follow_policy(self, *args):
-            return np.random.randint(0, self.environment.action_space_len)
+        def follow_policy(self, observation, *args):
+            if observation[2] == 0:
+                return np.random.randint(0, self.environment.action_space_len)
+            else:
+                return 1
 
     envi = HitStand()
     agent = RandomPolicyAgent(envi)
     EPISODES = 100_000
-    SHOW_EVERY = 25_000
+    SHOW_EVERY = None
     SAVE_EVERY = None
     COLLECT_EVERY = 1
     results = run_experiment(envi, agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
