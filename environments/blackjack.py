@@ -33,7 +33,7 @@ class HitStand(BaseEnvironment):
 
     __NAME = 'Jack'
     __NUM_PLAYERS = 1
-    __NUM_DECKS = 8
+    __NUM_DECKS = 6
     __INITIAL_CASH = 10_000
     __ALLOW_INDEBTNESS = True
     __PLAYERS_BET = 1
@@ -120,8 +120,10 @@ class HitStand(BaseEnvironment):
                 self.__game_instance.get_croupier_hand()
 
             observation = self.__game_instance.alive_players[0].current_hand.best_value, \
-                          self.__game_instance.croupier_hand.best_value, \
-                          int(self.__game_instance.alive_players[0].current_hand.is_soft)
+            max(self.__game_instance.croupier_hand.card_values[0])\
+                if isinstance(self.__game_instance.croupier_hand.card_values[0], list) else self.__game_instance.croupier_hand.card_values[0], \
+            int(self.__game_instance.alive_players[0].current_hand.is_soft)
+
             message = self.__game_instance.resolve_round(self.__game_instance.players[0])
             reward = self.__game_instance.players[0].gains
 
@@ -162,6 +164,16 @@ class HitStand(BaseEnvironment):
     def render(self):
         self.verbose = True
 
+    def __str__(self):
+        description = '1. 6 decks\n' \
+                      '2. Dealer stands on soft 17\n' \
+                      '3. No Double Down\n' \
+                      '4. No split\n' \
+                      '5. No insurance offered\n' \
+                      '6. No surrender\n' \
+                      '7. Natural Blackjack 3:2' \
+
+        return description
 
 
 

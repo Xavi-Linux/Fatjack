@@ -57,6 +57,7 @@ class Agent:
         self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
         self.save_at_episodes = []
         self.current_table_path = ''
+        self.num_executed_episodes = 0
 
     def load_table(self, episode=None, overwrite=False, most_recent=True, filename=None):
         if filename is None:
@@ -86,6 +87,7 @@ class Agent:
             return table
 
     def save_table(self, episode, filename=None):
+        episode += self.num_executed_episodes
         if filename is None:
             path = self.__TABLES_Dir.joinpath(self.__class__.__name__ + '_' + str(episode) +'_'+
                                               str(datetime.now().strftime('%Y%m%d_%H%M')))
@@ -139,6 +141,7 @@ class MonteCarloPredictor(Agent):
         if terminal:
             self.update_table()
             self.current_episode_steps = {}
+            self.num_executed_episodes +=1
 
     def update_table(self):
         accum_discounted_reward = 0
@@ -153,16 +156,58 @@ class MonteCarloPredictor(Agent):
                 reward = self.current_episode_steps[time_step + 1]['reward'] + self.hyperparams['discount_rate'] * accum_discounted_reward
                 self.time_steps_counter[self.current_episode_steps[time_step]['observation']] += 1
                 self.table[self.current_episode_steps[time_step]['observation']] = self.incremental_average(
-                    self.table[self.current_episode_steps[time_step]['observation']],
-                    reward,
-                    self.time_steps_counter[self.current_episode_steps[time_step]['observation']])
+                                                                                   self.table[self.current_episode_steps[time_step]['observation']],
+                                                                                   reward,
+                                                                                   self.time_steps_counter[self.current_episode_steps[time_step]['observation']])
+
+                accum_discounted_reward = reward
 
 
 if __name__ == '__main__':
 
-    env = HitStand()
-    agent = MonteCarloPredictor(env)
-    tab = agent.load_table(most_recent=True, overwrite=False)
-    print(agent.list_saved_tables())
+    def run_experiment(env, agent, episodes, show, save=None, collect_rewards=None):
+        rewards = []
+        average_rewards = []
+        for episode in range(episodes):
+            if (episode + 1) % show==0:
+                print('Episode {0}:'.format(episode + 1))
+                env.render()
 
+            state, reward, terminal, _ = env.reset()
+            agent.evaluate_state(state, reward, terminal)
+            if state[0] == 21:
+                print('watch out')
+            while not terminal:
+                action = agent.follow_policy(state, reward, terminal)
+                state, reward, terminal, _ = env.step(action)
+                agent.evaluate_state(state, reward, terminal)
+
+            rewards.append(reward)
+            if save:
+                if (episode + 1) % save==0:
+                    agent.save_table(episode + 1)
+
+            if collect_rewards:
+                if (episode + 1) % collect_rewards==0:
+                    average_reward = sum(rewards[-collect_rewards:]) / collect_rewards
+                    average_rewards.append(average_reward)
+
+        return average_rewards
+
+
+    class RandomPolicyAgent(MonteCarloPredictor):
+
+        def follow_policy(self, observation, *args):
+            if observation[2] == 0:
+                return np.random.randint(0, self.environment.action_space_len)
+            else:
+                return 1
+
+    envi = HitStand()
+    agent = RandomPolicyAgent(envi)
+    EPISODES = 100_000
+    SHOW_EVERY = None
+    SAVE_EVERY = None
+    COLLECT_EVERY = 1
+    results = run_experiment(envi, agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
 
