@@ -1,9 +1,9 @@
 import numpy as np
 from environments.base import HitStand
 import pickle
-from datetime import datetime
 from pathlib import Path
 from os.path import getctime
+from uuid import uuid4
 
 
 def folderpath_search(origin:Path, sought_folder:str)->Path:
@@ -19,10 +19,11 @@ class Agent:
 
     __TABLE_TYPES = ('v', 'q')
     __INIT_TYPES = ('random', 'null')
-    __Tables = 'tables'
-    __TABLES_Dir = folderpath_search(Path.cwd(), __Tables)
+    __TABLES_Dir = folderpath_search(Path.cwd(), 'tables')
+    __AGENTS_Dir = folderpath_search(Path.cwd(), 'stored_agents')
 
     def __init__(self, environment, table_type='v', table_init='random'):
+        self.id = uuid4().hex
         self.environment = environment
         if table_type not in self.__TABLE_TYPES:
             raise Exception('Invalid table type')
@@ -59,15 +60,13 @@ class Agent:
         self.current_table_path = ''
         self.num_executed_episodes = 0
 
-    def load_table(self, episode=None, overwrite=False, most_recent=True, filename=None):
+    def load_table(self, episode=None, overwrite=False, filename=None):
         if filename is None:
-            if most_recent:
-                criteria = self.__class__.__name__ + '_*'
+            if episode:
+                criteria = 'T_' + self.id + '_' + str(episode)
             else:
-                if episode:
-                    criteria = self.__class__.__name__ + '_' + str(episode) + '_*'
-                else:
-                    raise Exception('Episode number must be specified when most_recent is False')
+                criteria = 'T_' + self.id + '_*'
+
             try:
                 path = sorted(self.__TABLES_Dir.glob(criteria), key=getctime, reverse=True)[0]
 
@@ -86,11 +85,11 @@ class Agent:
         else:
             return table
 
-    def save_table(self, episode, filename=None):
-        episode += self.num_executed_episodes
+    def save_table(self, filename=None):
+        episode = self.num_executed_episodes
         if filename is None:
-            path = self.__TABLES_Dir.joinpath(self.__class__.__name__ + '_' + str(episode) +'_'+
-                                              str(datetime.now().strftime('%Y%m%d_%H%M')))
+            path = self.__TABLES_Dir.joinpath('T_' + self.id + '_' + str(episode))
+
         else:
             path = self.__TABLES_Dir.joinpath(filename)
 
@@ -122,7 +121,12 @@ class Agent:
         raise NotImplemented
 
     def list_saved_tables(self):
-        return list(map(str, self.__TABLES_Dir.glob(self.__class__.__name__ + '_*')))
+        return list(map(str, sorted(self.__TABLES_Dir.glob('T_' + self.id + '_*'),key=getctime)))
+
+    def save(self, episode):
+        path = self.__AGENTS_Dir.joinpath('A_' + self.__class__.__name__ + '_' + str(self.id) + '_' + str(episode))
+        with open(path, 'wb') as f:
+            pickle.dump(self, f)
 
 
 class MonteCarloPredictor(Agent):
@@ -205,9 +209,9 @@ if __name__ == '__main__':
 
     envi = HitStand()
     agent = RandomPolicyAgent(envi)
-    EPISODES = 100_000
-    SHOW_EVERY = None
+    EPISODES = 1_000
+    SHOW_EVERY = 1_000
     SAVE_EVERY = None
     COLLECT_EVERY = 1
-    results = run_experiment(envi, agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
+    #results = run_experiment(envi, agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
 
