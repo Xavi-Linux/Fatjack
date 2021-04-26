@@ -44,7 +44,21 @@ document.addEventListener("DOMContentLoaded",function(e){
         document.querySelectorAll(".instruction").forEach(function(element){
             element.disabled = false;
         });
+
+        document.getElementById("play").disabled = true;
+        
+        this.childNodes.forEach(function(element){
+            element.disabled = true;
+        });
         
         e.preventDefault();
     });
+
+    function disable_instructors(){
+        document.querySelectorAll(".instruction").forEach(function(element){
+            element.disabled = true;
+        });
+    }
+
+    disable_instructors();
 });
