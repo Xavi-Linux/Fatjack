@@ -7,23 +7,82 @@
         <meta name="author" content="Xavi-Linux">
         <title>Fatjack</title>
         <link rel="stylesheet" type="text/css" href="../static/css/main.css">
-        <!--<link rel="icon" href="../static/imgs/favicon.png" type="image/x-icon">
-        
-        <script type="text/javascript" src="../static/js/main.js"></script>-->
+        <!--<link rel="icon" href="../static/imgs/favicon.png" type="image/x-icon"> -->        
+        <script type="text/javascript" src="../static/js/main.js"></script>
     </head>
     <body>
         <header>
             <h1>Fatjack</h1>
         </header>
-        <section>       
-             <table>
-            <tr>
-    
-            </tr>
-        </table>
+        <section>
+            <form>
+                <div id="dealer">
+                    <div>
+                        <label>Dealer:</label>
+                    </div>
+                    <ul class="cards">
+                        <li>1</li>
+                        <li>2</li>
+                        <li>3</li>
+                        <li>4</li>
+                        <li>5</li>
+                        <li>6</li>
+                        <li>7</li>
+                        <li>8</li>
+                        <li>9</li>
+                        <li>10</li>
+                    </ul>
+                </div>
+                <div id="players">
+                    <div>
+                        <label>Player:</label>
+                    </div>
+                    <ul class="cards">
+                        <li>1</li>
+                        <li>2</li>
+                        <li>3</li>
+                        <li>4</li>
+                        <li>5</li>
+                        <li>6</li>
+                        <li>7</li>
+                        <li>8</li>
+                        <li>9</li>
+                        <li>10</li>
+                    </ul>
+                </div>
+                <div>
+                    <input type="button" value="Hit" disabled class="instruction">
+                    <input type="button" value="Stand" disabled class="instruction">
+                </div>
+            </form>
+            <div>
+                <label>Current bet:</label>
+                <input type="text" disabled placeholder="0.00€">
+                <br>
+                <label>Total Cash:</label>
+                <input type="text" disabled placeholder="0.00€">
+            </div>
+            <input type="button" value="Play!" id="play">
+            <form id="player_info">
+                <label>Player's name:</label>
+                <input type="text">
+                <label>Num. Players:</label>
+                <input type="number" min="1" max="1" step="1"value="1">
+                <br>
+                <label>Cash:</label>
+                <input type="number" min="1000">
+                <label>Allow indebtness</label>
+                <select>
+                    <option>Y</option>
+                    <option>N</option>
+                </select>
+                <br>
+                <input type="submit" value="Start!">
+            </form>
+            <img src="/static/img/board.jpg">
         </section>
         <footer>
-
+            <p>Xavi-Linux &reg;</p>
         </footer>
     </body>
 </html>
