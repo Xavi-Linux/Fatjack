@@ -35,7 +35,7 @@
                 </div>
                 <div id="players">
                     <div>
-                        <label>Player:</label>
+                        <label id="name">Player:</label>
                     </div>
                     <ul class="cards">
                         <li>1</li>
@@ -55,7 +55,7 @@
                     <input type="button" value="Stand" disabled class="instruction">
                 </div>
             </form>
-            <div>
+            <div id="game_status">
                 <label>Current bet:</label>
                 <input type="text" disabled placeholder="0.00€">
                 <br>
@@ -65,19 +65,19 @@
             <input type="button" value="Play!" id="play">
             <form id="player_info">
                 <label>Player's name:</label>
-                <input type="text">
+                <input type="text" id="sent_name">
                 <label>Num. Players:</label>
                 <input type="number" min="1" max="1" step="1"value="1">
                 <br>
                 <label>Cash:</label>
-                <input type="number" min="1000">
+                <input type="number" min="1000" id="cash">
                 <label>Allow indebtness</label>
                 <select>
                     <option>Y</option>
                     <option>N</option>
                 </select>
                 <br>
-                <input type="submit" value="Start!">
+                <input type="submit" value="Start!" id="start">
             </form>
             <img src="/static/img/board.jpg">
         </section>
