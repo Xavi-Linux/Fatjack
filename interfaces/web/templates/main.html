@@ -55,12 +55,18 @@
                     <input type="button" value="Stand" disabled class="instruction">
                 </div>
             </form>
+            <form id="bet_container">
+                <label>Next bet value:</label>
+                <input type="number" min="1" id="bet_value">
+                <br>
+                <input type="button" value="Place bet" id="bet_placer">
+            </form>
             <div id="game_status">
                 <label>Current bet:</label>
-                <input type="text" disabled placeholder="0.00€">
+                <input type="text" disabled placeholder="€0.00" id="current_bet">
                 <br>
                 <label>Total Cash:</label>
-                <input type="text" disabled placeholder="0.00€">
+                <input type="text" disabled placeholder="€0.00" id="total_cash">
             </div>
             <input type="button" value="Play!" id="play">
             <form id="player_info">
