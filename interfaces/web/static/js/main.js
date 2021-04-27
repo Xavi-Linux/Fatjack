@@ -22,6 +22,12 @@ document.addEventListener("DOMContentLoaded",function(e){
         setTimeout(function(){removeClass(element, clas)}, time);
     }
 
+    function startGame(name, total_cash, indebtness){
+        var request = new XMLHttpRequest();
+        request.open("GET", "/start", true);
+        request.send();
+    }
+
     document.getElementById("play").addEventListener("click", function(e){
         document.getElementById("player_info").style.visibility = "visible";
     });
@@ -58,13 +64,11 @@ document.addEventListener("DOMContentLoaded",function(e){
             if (last_error != null){
                 last_error.parentNode.removeChild(last_error);            
             }
-        }        
+        }
 
+        startGame(name, cash, document.getElementById("indebtness").value);
+        
         document.getElementById("name").innerHTML = name + ":";
-
-        document.querySelectorAll(".instruction").forEach(function(element){
-            element.disabled = false;
-        });
 
         document.getElementById("play").disabled = true;
         
@@ -99,6 +103,19 @@ document.addEventListener("DOMContentLoaded",function(e){
             if (last_error != null){
                 last_error.parentNode.removeChild(last_error);            
             }
+            
+            document.getElementById("total_cash").value = currencyConverter(money - bet);
+            document.getElementById("current_bet").value = currencyConverter(bet);
+            document.getElementById("bet_value").value = "";
+            document.getElementById("bet_container").style.display = "none";
+
+            
+
+            document.querySelectorAll(".instruction").forEach(function(element){
+                element.disabled = false;
+            });
+    
+
         }
     });
 
