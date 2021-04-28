@@ -35,6 +35,25 @@ def bet():
                   'Dealer': game.croupier_hand.card_names})
 
 
+@app.route('/action', methods=['POST'])
+def action():
+    action = request.form['action']
+    game.send_action(game.alive_players[0], action)
+    croupier_hand = game.croupier_hand.card_names
+    status = 'on'
+    name= game.alive_players[0].name
+    current_hand = game.alive_players[0].current_hand.card_names
+    if action.lower() == 'stand':
+        if not all(map(lambda p:p.current_hand.is_busted, game.alive_players)):
+            croupier_hand = game.get_croupier_hand().card_names
+        for player in game.alive_players:
+            status = game.resolve_round(player).upper()
+
+    return dumps({name: current_hand,
+                  'Dealer': croupier_hand,
+                  'Status': status})
+
+
 if __name__ == '__main__':
 
     app.run('0.0.0.0', 5000)

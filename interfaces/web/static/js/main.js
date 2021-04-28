@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded",function(e){
 
     function startGame(player_name, total_cash, indebtness, num_players){
         var request = new XMLHttpRequest();       
-        request.open("POST", "/start", true);
+        request.open("POST", "/start");
         request.setRequestHeader('Content-Type', "application/json");
         var obj = {name: player_name,
                initial_cash: total_cash,
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded",function(e){
                 }
             }
         
-        request.open("POST", "/bet", true);
+        request.open("POST", "/bet");
         request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         request.send( "value=" + money);
     }
@@ -151,6 +151,52 @@ document.addEventListener("DOMContentLoaded",function(e){
     
 
         }
+    });
+
+    function removeChildren(node){
+        while (node.firstChild){
+            node.removeChild(node.firstChild);
+        }
+    }
+    document.querySelectorAll(".instruction").forEach(function(element){
+        element.addEventListener("click", function(e){
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                if (request.readyState == 4){
+                    if (request.status == 200){
+                        var obj = JSON.parse(request.responseText);
+                        var player = document.getElementById("player_hand");
+                        var name = document.getElementById("sent_name").value;
+                        var dealer = document.getElementById("dealer_hand");
+                        if (obj["Status"] == "on"){
+                            removeChildren(player);
+                            fillHand(player, obj[name]);
+                        } else {
+                            removeChildren(dealer);
+                            fillHand(dealer, obj["Dealer"]);                            
+                            document.querySelectorAll(".instruction").forEach(function(element){
+                                element.disabled = true;
+                            });
+
+                            var status_message = "<p class='err'>" + obj["Status"] + "</p>";
+                            var message = document.createElement("p");
+                            message.innerHTML = status_message;
+                            player.parentNode.append(message);
+                            
+                            setTimeout(function(){
+                                removeChildren(player);
+                                removeChildren(dealer);
+                                player.parentNode.removeChild(message);
+                            }, 5000);
+                        }
+                    }
+                }
+            }
+
+            request.open("POST", "/action")
+            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+            request.send("action=" + e.target.value);
+        });
     });
 
     function resetAll(){
