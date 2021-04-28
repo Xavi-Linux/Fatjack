@@ -22,10 +22,42 @@ document.addEventListener("DOMContentLoaded",function(e){
         setTimeout(function(){removeClass(element, clas)}, time);
     }
 
-    function startGame(name, total_cash, indebtness){
+    function startGame(player_name, total_cash, indebtness, num_players){
+        var request = new XMLHttpRequest();       
+        request.open("POST", "/start", true);
+        request.setRequestHeader('Content-Type', "application/json");
+        var obj = {name: player_name,
+               initial_cash: total_cash,
+               allow_debt: indebtness,
+               };
+        var sent_json = JSON.stringify(obj);
+        request.send(sent_json);
+    }
+
+    function fillHand(element, array){
+        array.forEach(function(item){
+            var card = document.createElement("li");
+            card.innerHTML = item;
+            element.appendChild(card);
+        });
+    }
+
+    function placeBet(money){
         var request = new XMLHttpRequest();
-        request.open("GET", "/start", true);
-        request.send();
+        request.onreadystatechange = function(){
+            if (request.readyState == 4){
+                if (request.status == 200){
+                    var obj = JSON.parse(request.responseText);
+                    var name = document.getElementById("sent_name").value;
+                    fillHand(document.getElementById("player_hand"), obj[name])
+                    fillHand(document.getElementById("dealer_hand"), obj["Dealer"])
+                    }
+                }
+            }
+        
+        request.open("POST", "/bet", true);
+        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.send( "value=" + money);
     }
 
     document.getElementById("play").addEventListener("click", function(e){
@@ -66,7 +98,7 @@ document.addEventListener("DOMContentLoaded",function(e){
             }
         }
 
-        startGame(name, cash, document.getElementById("indebtness").value);
+        startGame(name, cash, document.getElementById("indebtness").value, document.getElementById("num_players").value);
         
         document.getElementById("name").innerHTML = name + ":";
 
@@ -103,6 +135,8 @@ document.addEventListener("DOMContentLoaded",function(e){
             if (last_error != null){
                 last_error.parentNode.removeChild(last_error);            
             }
+
+            placeBet(bet);
             
             document.getElementById("total_cash").value = currencyConverter(money - bet);
             document.getElementById("current_bet").value = currencyConverter(bet);
