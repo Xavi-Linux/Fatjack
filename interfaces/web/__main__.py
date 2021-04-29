@@ -13,7 +13,7 @@ def main():
 
 @app.route('/start', methods=['POST'])
 def start():
-    info = request.json
+    info = dict(request.form)
     if info:
         info['initial_cash'] = float(info['initial_cash'])
         info['allow_debt'] = True if ['allow_debt'] == 'Y' else False
