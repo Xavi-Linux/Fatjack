@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded",function(e){
     //Reset File functions
     document.forms["player_info"].reset();
-
+   
     function resetAll(){
         document.querySelectorAll(".instruction").forEach(function(element){
             element.disabled = true;
@@ -59,6 +59,28 @@ document.addEventListener("DOMContentLoaded",function(e){
         }
     }
 
+    function toggleError(expression, parent, message, cls){
+        var last_error = parent.querySelector(".err." + cls);
+        if (expression){
+            if (last_error == null){
+                var text_error = "<p class='err " + cls + "'>" + message + "</p>";
+                var error_element = document.createElement("p");
+                error_element.innerHTML = text_error;
+                parent.append(error_element);              
+                
+            }
+
+            return true;
+
+        }else {            
+            if (last_error != null){
+                last_error.parentNode.removeChild(last_error);
+                last_error = null;
+            }
+        }
+        return false;
+    }
+
     //Common functions - END
     //AJAX Functions
     function sendInfo(method, url, async, data, callback){
@@ -90,36 +112,16 @@ document.addEventListener("DOMContentLoaded",function(e){
     //Start!
     document.getElementById("player_info").addEventListener("submit", function(e){
         var name = document.getElementById("sent_name").value;
-        var last_error = document.querySelector(".err");
-        if (name == ""){
-            if (last_error == null){
-                var text_error = "<p class='err'>Error! Player's name must be filled in!</p>";
-                var error_element = document.createElement("p");
-                error_element.innerHTML = text_error;
-                this.append(error_element);
-            }
+        var cash = document.getElementById("cash").value;
+
+        if(toggleError(name=="", e.target, "Error! Player's name must be filled in!", "name")){
             e.preventDefault();
             return;
-            
-        }else {            
-            if (last_error != null){
-                last_error.parentNode.removeChild(last_error);
-                last_error = null;
-            }
         }
 
-        var cash = document.getElementById("cash").value;
-        if (cash == "" || cash < 1000){
-            var text_error = "<p class='err'>Error! Cash must be greater than €1,000!</p>";
-            var error_element = document.createElement("p");
-            error_element.innerHTML = text_error;
-            this.append(error_element); 
+        if (toggleError((cash == "" || cash < 1000 || isNaN(cash)), e.target,"Error! Cash must be greater than €1,000!", "cash")) {
             e.preventDefault();
             return;
-        }else {
-            if (last_error != null){
-                last_error.parentNode.removeChild(last_error);            
-            }
         }
 
         sendInfo("POST", "/start", false, BuildForm({name: name, initial_cash: cash, 
@@ -149,20 +151,10 @@ document.addEventListener("DOMContentLoaded",function(e){
         var bet = document.getElementById("bet_value").value;
         var remaining_cash = document.getElementById("total_cash").value;
         var money = convertCurrency(remaining_cash);
-        var last_error = document.querySelector(".err");
-        
-        if (bet < 0 || bet > money || bet == ""){
-            if (last_error == null){
-                var text_error = "<p class='err'>Error!Bet value must be between €1 and " + remaining_cash + "!</p>";
-                var error_element = document.createElement("p");
-                error_element.innerHTML = text_error;
-                this.parentNode.append(error_element);
-            }            
-        }else {
-            if (last_error != null){
-                last_error.parentNode.removeChild(last_error);            
-            }
+        var debt = document.getElementById("indebtness").value;
+        var evaluation = (bet < 0 || bet == "" || (bet > money && debt =="N"));
 
+        if (!toggleError(evaluation, e.target.parentNode, "Bet value must be between €1 and " + remaining_cash, "bet")){
             sendInfo("POST", "/bet", false, BuildForm({value: bet}),(text)=>{
                     var obj = JSON.parse(text);
                     var name = document.getElementById("sent_name").value;
@@ -177,8 +169,7 @@ document.addEventListener("DOMContentLoaded",function(e){
 
             document.querySelectorAll(".instruction").forEach(function(element){
                 element.disabled = false;
-            });
-    
+            });  
 
         }
     });
