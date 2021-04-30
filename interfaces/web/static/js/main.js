@@ -81,6 +81,55 @@ document.addEventListener("DOMContentLoaded",function(e){
         return false;
     }
 
+    function checkStatus(obj){
+        var player = document.getElementById("player_hand");
+        var name = document.getElementById("sent_name").value;
+        var dealer = document.getElementById("dealer_hand");
+
+        removeChildren(player);
+        fillHand(player, obj[name]);
+        removeChildren(dealer);
+        fillHand(dealer, obj["Dealer"]);
+
+        if (obj["Status"] != "on"){       
+            document.querySelectorAll(".instruction").forEach(function(element){
+                element.disabled = true;
+            });
+
+            toggleError(1==1, player.parentNode, obj["Status"], "outcome");
+            
+            setTimeout(function(){
+                removeChildren(player);
+                removeChildren(dealer);
+                toggleError(1==2, player.parentNode, obj["Status"], "outcome");
+                document.getElementById("total_cash").value = currencyConverter(obj["Player_cash"]);
+                document.getElementById("current_bet").value = currencyConverter(0);
+                if (obj["Continuity"] != null){
+                    gameOver(obj["Continuity"]);
+                }else {
+                    toggleBetContainer();
+                }                
+            }, 5000);           
+
+        }        
+    }
+
+    function gameOver(message){
+        alert(message);
+
+        document.getElementById("total_cash").value = currencyConverter(0);
+        document.getElementById("current_bet").value = currencyConverter(0);
+        document.getElementById("player_info").style.visibility = "hidden";
+        document.getElementById("name").innerHTML = "Player:";
+        document.getElementById("play").disabled = false;
+        document.getElementById("sent_name").value = "";
+        document.getElementById("cash").value = "";
+        document.getElementById("player_info").childNodes.forEach(function(element){
+            element.disabled = false;
+        });
+
+    }
+
     //Common functions - END
     //AJAX Functions
     function sendInfo(method, url, async, data, callback){
@@ -104,12 +153,13 @@ document.addEventListener("DOMContentLoaded",function(e){
         return data;
     }
     //Ajax Functions - END
+
     //Events
-    //Play!
+    /////Play!
     document.getElementById("play").addEventListener("click", function(e){
         document.getElementById("player_info").style.visibility = "visible";
     });
-    //Start!
+    /////Start!
     document.getElementById("player_info").addEventListener("submit", function(e){
         var name = document.getElementById("sent_name").value;
         var cash = document.getElementById("cash").value;
@@ -146,7 +196,7 @@ document.addEventListener("DOMContentLoaded",function(e){
 
         e.preventDefault();
     });
-    //Place Bet
+    /////Place Bet
     document.getElementById("bet_placer").addEventListener("click", function(e){
         var bet = document.getElementById("bet_value").value;
         var remaining_cash = document.getElementById("total_cash").value;
@@ -155,55 +205,30 @@ document.addEventListener("DOMContentLoaded",function(e){
         var evaluation = (bet < 0 || bet == "" || (bet > money && debt =="N"));
 
         if (!toggleError(evaluation, e.target.parentNode, "Bet value must be between €1 and " + remaining_cash, "bet")){
+            document.getElementById("total_cash").value = currencyConverter(money - bet);
+            document.getElementById("current_bet").value = currencyConverter(bet);            
+            document.querySelectorAll(".instruction").forEach(function(element){
+                element.disabled = false;                          
+            });
+
+            toggleBetContainer();
+
             sendInfo("POST", "/bet", false, BuildForm({value: bet}),(text)=>{
                     var obj = JSON.parse(text);
-                    var name = document.getElementById("sent_name").value;
-                    fillHand(document.getElementById("player_hand"), obj[name])
-                    fillHand(document.getElementById("dealer_hand"), obj["Dealer"])
-            } );
-            
-            document.getElementById("total_cash").value = currencyConverter(money - bet);
-            document.getElementById("current_bet").value = currencyConverter(bet);
-            toggleBetContainer();
-            
-
-            document.querySelectorAll(".instruction").forEach(function(element){
-                element.disabled = false;
-            });  
+                    checkStatus(obj);
+            });           
 
         }
     });
 
-    //Hit & Stand
+    /////Hit & Stand
     document.querySelectorAll(".instruction").forEach(function(element){
         element.addEventListener("click", function(e){
             sendInfo("POST", "/action", false, BuildForm({action: e.target.value}), (text)=>{
                 var obj = JSON.parse(text);
-                var player = document.getElementById("player_hand");
-                var name = document.getElementById("sent_name").value;
-                var dealer = document.getElementById("dealer_hand");
-                if (obj["Status"] == "on"){
-                    removeChildren(player);
-                    fillHand(player, obj[name]);
-                } else {
-                    removeChildren(dealer);
-                    fillHand(dealer, obj["Dealer"]);                            
-                    document.querySelectorAll(".instruction").forEach(function(element){
-                        element.disabled = true;
-                    });
-
-                    var status_message = "<p class='err'>" + obj["Status"] + "</p>";
-                    var message = document.createElement("p");
-                    message.innerHTML = status_message;
-                    player.parentNode.append(message);
-                    
-                    setTimeout(function(){
-                        removeChildren(player);
-                        removeChildren(dealer);
-                        player.parentNode.removeChild(message);
-                        toggleBetContainer();
-                    }, 5000);                    
-                }})
+                checkStatus(obj);
+            })
         });
     });
+    //Events - END
 });
