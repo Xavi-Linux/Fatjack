@@ -20,34 +20,14 @@
                     <div>
                         <label>Dealer:</label>
                     </div>
-                    <ul class="cards">
-                        <li>1</li>
-                        <li>2</li>
-                        <li>3</li>
-                        <li>4</li>
-                        <li>5</li>
-                        <li>6</li>
-                        <li>7</li>
-                        <li>8</li>
-                        <li>9</li>
-                        <li>10</li>
+                    <ul class="cards" id="dealer_hand">
                     </ul>
                 </div>
                 <div id="players">
                     <div>
                         <label id="name">Player:</label>
                     </div>
-                    <ul class="cards">
-                        <li>1</li>
-                        <li>2</li>
-                        <li>3</li>
-                        <li>4</li>
-                        <li>5</li>
-                        <li>6</li>
-                        <li>7</li>
-                        <li>8</li>
-                        <li>9</li>
-                        <li>10</li>
+                    <ul class="cards" id="player_hand">
                     </ul>
                 </div>
                 <div>
@@ -55,31 +35,37 @@
                     <input type="button" value="Stand" disabled class="instruction">
                 </div>
             </form>
+            <form id="bet_container">
+                <label>Next bet value:</label>
+                <input type="number" min="1" id="bet_value">
+                <br>
+                <input type="button" value="Place bet" id="bet_placer">
+            </form>
             <div id="game_status">
                 <label>Current bet:</label>
-                <input type="text" disabled placeholder="0.00€">
+                <input type="text" disabled placeholder="€0.00" id="current_bet">
                 <br>
                 <label>Total Cash:</label>
-                <input type="text" disabled placeholder="0.00€">
+                <input type="text" disabled placeholder="€0.00" id="total_cash">
             </div>
             <input type="button" value="Play!" id="play">
             <form id="player_info">
                 <label>Player's name:</label>
                 <input type="text" id="sent_name">
                 <label>Num. Players:</label>
-                <input type="number" min="1" max="1" step="1"value="1">
+                <input type="number" min="1" max="1" step="1"value="1" id="num_players">
                 <br>
                 <label>Cash:</label>
                 <input type="number" min="1000" id="cash">
                 <label>Allow indebtness</label>
-                <select>
+                <select id="indebtness">
                     <option>Y</option>
                     <option>N</option>
                 </select>
                 <br>
                 <input type="submit" value="Start!" id="start">
             </form>
-            <img src="/static/img/board.jpg">
+            <!--<img src="/static/img/board.jpg">-->
         </section>
         <footer>
             <p>Xavi-Linux &reg;</p>

@@ -1,64 +1,234 @@
 document.addEventListener("DOMContentLoaded",function(e){
+    //Reset File functions
     document.forms["player_info"].reset();
+   
+    function resetAll(){
+        document.querySelectorAll(".instruction").forEach(function(element){
+            element.disabled = true;
+        });
+        document.getElementById("total_cash").value = "€0.00";
+        document.getElementById("current_bet").value = "€0.00";
+        document.getElementById("bet_value").value = "";
+    }
+    resetAll();
+    //Reset File functions - END
+    //Common functions
+    function removeChildren(node){
+        while (node.firstChild){
+            node.removeChild(node.firstChild);
+        }
+    }
 
-    document.getElementById("play").addEventListener("click", function(e){
-        document.getElementById("player_info").style.visibility = "visible";
-    });
+    function currencyConverter(value){
+        const options = {style: "currency", currency:"EUR"};
+        const formatter = new Intl.NumberFormat("en-US", options);
+        return formatter.format(value);
+    }
 
-    document.getElementById("player_info").addEventListener("submit", function(e){
-        var name = document.getElementById("sent_name").value;
-        var last_error = document.querySelector(".err");
-        if (name == ""){
+    function convertCurrency(value){
+        return Number(value.replace(/[^0-9.-]+/g,""));
+    }
+
+    function toggleClass(element, clas, time){
+        function addClass(element, clas){
+            element.classList.add(clas);
+        }
+        function removeClass(element, clas){
+            element.classList.remove(clas);
+        }
+        addClass(element, clas);
+        setTimeout(function(){removeClass(element, clas)}, time);
+    }
+
+    function fillHand(element, array){
+        array.forEach(function(item){
+            var card = document.createElement("li");
+            card.innerHTML = item;
+            element.appendChild(card);
+        });
+    }
+
+    function toggleBetContainer(){
+        var container = document.getElementById("bet_container");
+        if (container.style.display == "none" || container.style.display == ""){
+            container.style.display = "block";
+            toggleClass(container, "high_border", 2000);
+        }else{
+            document.getElementById("bet_value").value = "";
+            container.style.display = "none";
+        }
+    }
+
+    function toggleError(expression, parent, message, cls){
+        var last_error = parent.querySelector(".err." + cls);
+        if (expression){
             if (last_error == null){
-                var text_error = "<p class='err'>Error! Player's name must be filled in!</p>";
+                var text_error = "<p class='err " + cls + "'>" + message + "</p>";
                 var error_element = document.createElement("p");
                 error_element.innerHTML = text_error;
-                this.append(error_element);
+                parent.append(error_element);              
+                
             }
-            e.preventDefault();
-            return;
-            
+
+            return true;
+
         }else {            
             if (last_error != null){
                 last_error.parentNode.removeChild(last_error);
                 last_error = null;
             }
         }
+        return false;
+    }
 
-        var cash = document.getElementById("cash").value;
-        if (cash == "" || cash < 1000){
-            var text_error = "<p class='err'>Error! Cash must be greater than €1,000!</p>";
-            var error_element = document.createElement("p");
-            error_element.innerHTML = text_error;
-            this.append(error_element); 
-            e.preventDefault();
-            return;
-        }else {
-            if (last_error != null){
-                last_error.parentNode.removeChild(last_error);            
-            }
+    function checkStatus(obj){
+        var player = document.getElementById("player_hand");
+        var name = document.getElementById("sent_name").value;
+        var dealer = document.getElementById("dealer_hand");
+
+        removeChildren(player);
+        fillHand(player, obj[name]);
+        removeChildren(dealer);
+        fillHand(dealer, obj["Dealer"]);
+
+        if (obj["Status"] != "on"){       
+            document.querySelectorAll(".instruction").forEach(function(element){
+                element.disabled = true;
+            });
+
+            toggleError(1==1, player.parentNode, obj["Status"], "outcome");
+            
+            setTimeout(function(){
+                removeChildren(player);
+                removeChildren(dealer);
+                toggleError(1==2, player.parentNode, obj["Status"], "outcome");
+                document.getElementById("total_cash").value = currencyConverter(obj["Player_cash"]);
+                document.getElementById("current_bet").value = currencyConverter(0);
+                if (obj["Continuity"] != null){
+                    gameOver(obj["Continuity"]);
+                }else {
+                    toggleBetContainer();
+                }                
+            }, 5000);           
+
         }        
+    }
 
-        document.getElementById("name").innerHTML = name + ":";
+    function gameOver(message){
+        alert(message);
 
-        document.querySelectorAll(".instruction").forEach(function(element){
+        document.getElementById("total_cash").value = currencyConverter(0);
+        document.getElementById("current_bet").value = currencyConverter(0);
+        document.getElementById("player_info").style.visibility = "hidden";
+        document.getElementById("name").innerHTML = "Player:";
+        document.getElementById("play").disabled = false;
+        document.getElementById("sent_name").value = "";
+        document.getElementById("cash").value = "";
+        document.getElementById("player_info").childNodes.forEach(function(element){
             element.disabled = false;
         });
+
+    }
+
+    //Common functions - END
+    //AJAX Functions
+    function sendInfo(method, url, async, data, callback){
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function(){
+            if (request.readyState == 4){
+                if (request.status == 200){
+                    callback(request.responseText);
+                }
+            }
+        }
+
+        request.open(method, url, async);
+        request.send(data);
+    }
+
+    function BuildForm(obj){
+        var data = new FormData();
+        const ks = Object.keys(obj);
+        ks.forEach((key, index)=>{data.append(key, obj[key]);});
+        return data;
+    }
+    //Ajax Functions - END
+
+    //Events
+    /////Play!
+    document.getElementById("play").addEventListener("click", function(e){
+        document.getElementById("player_info").style.visibility = "visible";
+    });
+    /////Start!
+    document.getElementById("player_info").addEventListener("submit", function(e){
+        var name = document.getElementById("sent_name").value;
+        var cash = document.getElementById("cash").value;
+
+        if(toggleError(name=="", e.target, "Error! Player's name must be filled in!", "name")){
+            e.preventDefault();
+            return;
+        }
+
+        if (toggleError((cash == "" || cash < 1000 || isNaN(cash)), e.target,"Error! Cash must be greater than €1,000!", "cash")) {
+            e.preventDefault();
+            return;
+        }
+
+        sendInfo("POST", "/start", false, BuildForm({name: name, initial_cash: cash, 
+                                                     allow_debt: document.getElementById("indebtness").value}),
+                 (text)=>{});
+
+        
+        document.getElementById("name").innerHTML = name + ":";
 
         document.getElementById("play").disabled = true;
         
         this.childNodes.forEach(function(element){
             element.disabled = true;
         });
-        
+
+        var cash_element = document.getElementById("total_cash");
+        cash_element.value = currencyConverter(cash);
+        toggleClass(cash_element, "high_input_text", 2000);
+
+
+        toggleBetContainer();
+
         e.preventDefault();
     });
+    /////Place Bet
+    document.getElementById("bet_placer").addEventListener("click", function(e){
+        var bet = document.getElementById("bet_value").value;
+        var remaining_cash = document.getElementById("total_cash").value;
+        var money = convertCurrency(remaining_cash);
+        var debt = document.getElementById("indebtness").value;
+        var evaluation = (bet < 0 || bet == "" || (bet > money && debt =="N"));
 
-    function disable_instructors(){
-        document.querySelectorAll(".instruction").forEach(function(element){
-            element.disabled = true;
+        if (!toggleError(evaluation, e.target.parentNode, "Bet value must be between €1 and " + remaining_cash, "bet")){
+            document.getElementById("total_cash").value = currencyConverter(money - bet);
+            document.getElementById("current_bet").value = currencyConverter(bet);            
+            document.querySelectorAll(".instruction").forEach(function(element){
+                element.disabled = false;                          
+            });
+
+            toggleBetContainer();
+
+            sendInfo("POST", "/bet", false, BuildForm({value: bet}),(text)=>{
+                    var obj = JSON.parse(text);
+                    checkStatus(obj);
+            });           
+
+        }
+    });
+
+    /////Hit & Stand
+    document.querySelectorAll(".instruction").forEach(function(element){
+        element.addEventListener("click", function(e){
+            sendInfo("POST", "/action", false, BuildForm({action: e.target.value}), (text)=>{
+                var obj = JSON.parse(text);
+                checkStatus(obj);
+            })
         });
-    }
-
-    disable_instructors();
+    });
+    //Events - END
 });
