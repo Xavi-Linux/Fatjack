@@ -55,6 +55,7 @@ class Agent:
                                                 self.environment.observation_space_low + 1) +
                                                 [self.environment.action_space_len]))
 
+        self.table_type= table_type
         self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
         self.save_at_episodes = []
         self.current_table_path = ''
@@ -101,7 +102,7 @@ class Agent:
     def table_look_up(self, observation):
         observation = np.array(observation)
         table_indexes = observation - np.array(self.environment.observation_space_low)
-        return tuple(table_indexes)
+        return list(table_indexes)
 
     @staticmethod
     def incremental_average(current_average, new_value, num_observations):
@@ -115,10 +116,10 @@ class Agent:
             self.hyperparams[k] = args[k]
 
     def evaluate_state(self, *args):
-        raise NotImplemented
+        raise NotImplementedError
 
     def follow_policy(self, *args):
-        raise NotImplemented
+        raise NotImplementedError
 
     def list_saved_tables(self):
         return list(map(str, sorted(self.__TABLES_Dir.glob('T_' + self.id + '_*'),key=getctime)))
@@ -133,13 +134,16 @@ class MonteCarloPredictor(Agent):
 
     __TABLES_file = 'MonteCarloPredictor_'
 
-    def __init__(self, environment):
-        super().__init__(environment,  table_type='v', table_init='null')
+    def __init__(self, environment, table_type='v'):
+        super().__init__(environment,  table_type=table_type, table_init='null')
         self.current_episode_steps = {}
 
-    def evaluate_state(self, observation, reward, terminal):
+    def evaluate_state(self, observation, reward, terminal, action=None):
         table_look_up = self.table_look_up(observation)
-        self.current_episode_steps[len(self.current_episode_steps)] = {'observation':table_look_up,
+        if self.table_type == 'q' and action is not None:
+            table_look_up = table_look_up + [action]
+
+        self.current_episode_steps[len(self.current_episode_steps)] = {'observation': tuple(table_look_up),
                                                                        'reward':reward
                                                                        }
         if terminal:
@@ -184,6 +188,8 @@ if __name__ == '__main__':
             while not terminal:
                 action = agent.follow_policy(state, reward, terminal)
                 state, reward, terminal, _ = env.step(action)
+                if state[0] == 21 and state[2] ==1:
+                    print('hello')
                 agent.evaluate_state(state, reward, terminal)
 
             rewards.append(reward)
@@ -206,12 +212,60 @@ if __name__ == '__main__':
                 return np.random.randint(0, self.environment.action_space_len)
             else:
                 return 1
+    
+    class FixAgent(MonteCarloPredictor):
+
+        def follow_policy(self, observation, *args):
+            if observation[0] > 19:
+                return 0
+            else:
+                return 1
+
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import FormatStrFormatter
+
+    def plot_v_func(table, title):
+        X = np.linspace(1, 10, 10)
+        Y = np.linspace(12, 21, 10)
+        Xm, Ym = np.meshgrid(X, Y)
+
+        fig = plt.figure(figsize=(20, 10))
+        fig.suptitle(t=title, fontsize=16, x=0.5, y=1.05)
+
+        common_style_dict = {'xlim':(X[0], X[-1]),
+                             'xticks':X,
+                             'xticklabels':['{:.0f}'.format(value) for value in list(X)[1:]] + ['A'],
+                             'xlabel':'Dealer\'s Card',
+                             'ylim':(Y[0], Y[-1]),
+                             'yticks':Y,
+                             'yticklabels':Y,
+                             'ylabel':'Player\'s Total',
+                             'zlim':(-1, 1.5),
+                             'zticks':np.arange(-1, 1.8, 0.2),
+                             'zticklabels':np.arange(-1, 1.8, 0.2),
+                             }
+
+        ax = fig.add_subplot(1, 2, 1, projection='3d', title='No usable Ace', **common_style_dict)
+        #ax.plot_surface(Xm, Ym, table[8:18,:10,0], cmap=plt.get_cmap('bwr'), vmin=-1, vmax=1.5)
+        ax.plot_wireframe(Xm, Ym, table[8:18, :10, 0], cmap=plt.get_cmap('bwr'))
+        ax.yaxis.set_major_formatter(FormatStrFormatter('% 1.0f'))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('% 1.1f'))
+        ax.view_init(0, -45)
+
+        ax = fig.add_subplot(1, 2, 2, projection='3d', title=' Usable Ace', **common_style_dict)
+        #ax.plot_surface(Xm, Ym, table[8:18,:10,1], cmap=plt.get_cmap('bwr'), vmin=-1, vmax=1.5)
+        ax.plot_wireframe(Xm, Ym, table[8:18, :10, 1], cmap=plt.get_cmap('bwr'))
+        ax.yaxis.set_major_formatter(FormatStrFormatter('% 1.0f'))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('% 1.1f'))
+        ax.view_init(0, -45)
+        return ax
 
     envi = HitStand()
-    agent = RandomPolicyAgent(envi)
+    agent = FixAgent(envi)
     EPISODES = 1_000
-    SHOW_EVERY = 1_000
+    SHOW_EVERY = 100_000
     SAVE_EVERY = None
-    COLLECT_EVERY = 1
-    #results = run_experiment(envi, agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
-
+    COLLECT_EVERY = 40_000
+    results = run_experiment(envi, agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
+    ax = plot_v_func(agent.table, 'After')
+    plt.show()
