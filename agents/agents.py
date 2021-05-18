@@ -164,6 +164,18 @@ class MonteCarloPredictor(Agent):
             accum_discounted_reward = reward
 
 
+class MontecarloController(MonteCarloPredictor):
+
+    __TABLES_file = 'MonteCarloController_'
+
+    def __init__(self, environment, table_type='q'):
+        super().__init__(environment, table_type=table_type)
+        self.hyperparams['epsilon_start'] = 1
+        self.hyperparams['epsilon_min'] = 0.05
+        self.hyperparams['epsilon_decay'] = 0.995
+
+
+
 if __name__ == '__main__':
 
     pass
