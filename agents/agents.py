@@ -55,10 +55,12 @@ class Agent:
                                                 self.environment.observation_space_low + 1) +
                                                 [self.environment.action_space_len]))
 
+        self.table_type= table_type
         self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
         self.save_at_episodes = []
         self.current_table_path = ''
         self.num_executed_episodes = 0
+        self.current_episode_steps = {}
 
     def load_table(self, episode=None, overwrite=False, filename=None):
         if filename is None:
@@ -101,7 +103,7 @@ class Agent:
     def table_look_up(self, observation):
         observation = np.array(observation)
         table_indexes = observation - np.array(self.environment.observation_space_low)
-        return tuple(table_indexes)
+        return list(table_indexes)
 
     @staticmethod
     def incremental_average(current_average, new_value, num_observations):
@@ -115,10 +117,10 @@ class Agent:
             self.hyperparams[k] = args[k]
 
     def evaluate_state(self, *args):
-        raise NotImplemented
+        raise NotImplementedError
 
     def follow_policy(self, *args):
-        raise NotImplemented
+        raise NotImplementedError
 
     def list_saved_tables(self):
         return list(map(str, sorted(self.__TABLES_Dir.glob('T_' + self.id + '_*'),key=getctime)))
@@ -133,13 +135,15 @@ class MonteCarloPredictor(Agent):
 
     __TABLES_file = 'MonteCarloPredictor_'
 
-    def __init__(self, environment):
-        super().__init__(environment,  table_type='v', table_init='null')
-        self.current_episode_steps = {}
+    def __init__(self, environment, table_type='v'):
+        super().__init__(environment,  table_type=table_type, table_init='null')
 
-    def evaluate_state(self, observation, reward, terminal):
+    def evaluate_state(self, observation, reward, terminal, action):
         table_look_up = self.table_look_up(observation)
-        self.current_episode_steps[len(self.current_episode_steps)] = {'observation':table_look_up,
+        if self.table_type == 'q':
+            table_look_up = table_look_up + [action]
+
+        self.current_episode_steps[len(self.current_episode_steps)] = {'observation': tuple(table_look_up),
                                                                        'reward':reward
                                                                        }
         if terminal:
@@ -149,69 +153,28 @@ class MonteCarloPredictor(Agent):
 
     def update_table(self):
         accum_discounted_reward = 0
-        if len(self.current_episode_steps) == 1:
-            self.time_steps_counter[self.current_episode_steps[0]['observation']] += 1
-            self.table[self.current_episode_steps[0]['observation']] = self.incremental_average(
-                self.table[self.current_episode_steps[0]['observation']],
-                self.current_episode_steps[0]['reward'],
-                self.time_steps_counter[self.current_episode_steps[0]['observation']])
-        else:
-            for time_step in range(len(self.current_episode_steps)-2, -1, -1):
-                reward = self.current_episode_steps[time_step + 1]['reward'] + self.hyperparams['discount_rate'] * accum_discounted_reward
-                self.time_steps_counter[self.current_episode_steps[time_step]['observation']] += 1
-                self.table[self.current_episode_steps[time_step]['observation']] = self.incremental_average(
+        for time_step in range(len(self.current_episode_steps)-1, -1, -1):
+            reward = self.current_episode_steps[time_step]['reward'] + self.hyperparams['discount_rate'] * accum_discounted_reward
+            self.time_steps_counter[self.current_episode_steps[time_step]['observation']] += 1
+            self.table[self.current_episode_steps[time_step]['observation']] = self.incremental_average(
                                                                                    self.table[self.current_episode_steps[time_step]['observation']],
                                                                                    reward,
                                                                                    self.time_steps_counter[self.current_episode_steps[time_step]['observation']])
 
-                accum_discounted_reward = reward
+            accum_discounted_reward = reward
 
+
+class MontecarloController(MonteCarloPredictor):
+
+    __TABLES_file = 'MonteCarloController_'
+
+    def __init__(self, environment, table_type='q'):
+        super().__init__(environment, table_type=table_type)
+        self.hyperparams['epsilon_start'] = 1
+        self.hyperparams['epsilon_min'] = 0.05
+        self.hyperparams['epsilon_decay'] = 0.995
+        
 
 if __name__ == '__main__':
 
-    def run_experiment(env, agent, episodes, show, save=None, collect_rewards=None):
-        rewards = []
-        average_rewards = []
-        for episode in range(episodes):
-            if (episode + 1) % show==0:
-                print('Episode {0}:'.format(episode + 1))
-                env.render()
-
-            state, reward, terminal, _ = env.reset()
-            agent.evaluate_state(state, reward, terminal)
-            if state[0] == 21:
-                print('watch out')
-            while not terminal:
-                action = agent.follow_policy(state, reward, terminal)
-                state, reward, terminal, _ = env.step(action)
-                agent.evaluate_state(state, reward, terminal)
-
-            rewards.append(reward)
-            if save:
-                if (episode + 1) % save==0:
-                    agent.save_table(episode + 1)
-
-            if collect_rewards:
-                if (episode + 1) % collect_rewards==0:
-                    average_reward = sum(rewards[-collect_rewards:]) / collect_rewards
-                    average_rewards.append(average_reward)
-
-        return average_rewards
-
-
-    class RandomPolicyAgent(MonteCarloPredictor):
-
-        def follow_policy(self, observation, *args):
-            if observation[2] == 0:
-                return np.random.randint(0, self.environment.action_space_len)
-            else:
-                return 1
-
-    envi = HitStand()
-    agent = RandomPolicyAgent(envi)
-    EPISODES = 1_000
-    SHOW_EVERY = 1_000
-    SAVE_EVERY = None
-    COLLECT_EVERY = 1
-    #results = run_experiment(envi, agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
-
+    pass

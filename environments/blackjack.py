@@ -165,7 +165,7 @@ class HitStand(BaseEnvironment):
         self.verbose = True
 
     def __str__(self):
-        description = '1. 6 decks\n' \
+        description = '1. 6 decks (with replacement after each episode)\n' \
                       '2. Dealer stands on soft 17\n' \
                       '3. No Double Down\n' \
                       '4. No split\n' \
