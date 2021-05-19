@@ -56,7 +56,8 @@ class Agent:
                                                 [self.environment.action_space_len]))
 
         self.table_type= table_type
-        self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
+        self.hyperparams = {'discount_rate': 1,
+                            'learning_rate': None}
         self.save_at_episodes = []
         self.current_table_path = ''
         self.num_executed_episodes = 0
@@ -105,9 +106,11 @@ class Agent:
         table_indexes = observation - np.array(self.environment.observation_space_low)
         return list(table_indexes)
 
-    @staticmethod
-    def incremental_average(current_average, new_value, num_observations):
-        return current_average + (1/num_observations) * (new_value - current_average)
+    def incremental_average(self, current_average, new_value, num_observations):
+        if self.hyperparams['learning_rate']:
+            return current_average + self.hyperparams['learning_rate'] * (new_value - current_average)
+        else:
+            return current_average + (1/num_observations) * (new_value - current_average)
 
     def set_hyperparams(self, **args):
         for k in args:
@@ -173,7 +176,42 @@ class MontecarloController(MonteCarloPredictor):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
-        
+
+
+class TDLambdaPredictor(Agent):
+
+    __TABLES_file = 'TDLambdaPredictor_'
+
+    def __init__(self, environment, table_type='v'):
+        super().__init__(environment,  table_type=table_type, table_init='null')
+        self.hyperparams['lambda'] = 1
+        self.eligibility_table = np.zeros_like(self.time_steps_counter)
+
+    def evaluate_state(self, observation, reward, terminal, action, next_state):
+        table_look_up = self.table_look_up(observation)
+        next_table_look_up = self.table_look_up(next_state)
+        if self.table_type == 'q':
+            table_look_up = table_look_up + [action]
+            next_table_look_up = next_table_look_up + [action]
+
+        table_look_up = tuple(table_look_up)
+        next_table_look_up = tuple(next_table_look_up)
+        self.time_steps_counter[table_look_up] += 1
+        self.eligibility_table[table_look_up] +=1
+        eligible = np.argwhere(self.eligibility_table > 0)
+        s_t = self.table[next_table_look_up]
+        s_t_1 = self.table[table_look_up]
+        for element in eligible:
+            learning_rate = self.hyperparams['learning_rate'] if self.hyperparams['learning_rate'] else\
+                (1/self.time_steps_counter[tuple(element)])
+
+            self.table[tuple(element)] += learning_rate * (reward + self.hyperparams['discount_rate'] * s_t - s_t_1) * \
+                                                           self.eligibility_table[tuple(element)]
+            self.eligibility_table[tuple(element)] *= self.hyperparams['lambda'] * self.hyperparams['discount_rate']
+
+        if terminal:
+            self.eligibility_table = np.zeros_like(self.time_steps_counter)
+
 
 if __name__ == '__main__':
 
