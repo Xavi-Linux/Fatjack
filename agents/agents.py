@@ -173,8 +173,7 @@ class MontecarloController(MonteCarloPredictor):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
-
-
+        
 
 if __name__ == '__main__':
 
