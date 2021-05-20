@@ -188,7 +188,7 @@ class TDLambdaPredictor(Agent):
         self.hyperparams['traces'] = 'accumulating'
         self.eligibility_table = np.zeros_like(self.time_steps_counter)
 
-    def evaluate_state(self, observation, reward, terminal, action, next_state):
+    def evaluate_state(self, observation, reward, terminal, action, next_state, next_action=None):
         table_look_up = self.table_look_up(observation)
         next_table_look_up = self.table_look_up(next_state)
         if self.table_type == 'q':
@@ -196,7 +196,9 @@ class TDLambdaPredictor(Agent):
             if terminal:
                 next_table_look_up = next_table_look_up + [0]
             else:
-                next_table_look_up = next_table_look_up + [self.follow_policy(next_state)]
+                next_table_look_up = next_table_look_up + [next_action]
+        # WATKINS
+
 
         table_look_up = tuple(table_look_up)
         next_table_look_up = tuple(next_table_look_up)
@@ -234,6 +236,11 @@ class SarsaLambda(TDLambdaPredictor):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
+
+
+class WatkinsLambda(SarsaLambda):
+
+    __TABLES_file = 'WatkinsLambda_'
 
 
 if __name__ == '__main__':
