@@ -184,10 +184,11 @@ class TDLambdaPredictor(Agent):
 
     def __init__(self, environment, table_type='v'):
         super().__init__(environment,  table_type=table_type, table_init='null')
-        self.hyperparams['lambda'] = 1
+        self.hyperparams['_lambda'] = 1
+        self.hyperparams['traces'] = 'accumulating'
         self.eligibility_table = np.zeros_like(self.time_steps_counter)
 
-    def evaluate_state(self, observation, reward, terminal, action, next_state):
+    def evaluate_state(self, observation, reward, terminal, action, next_state, next_action=None):
         table_look_up = self.table_look_up(observation)
         next_table_look_up = self.table_look_up(next_state)
         if self.table_type == 'q':
@@ -197,7 +198,15 @@ class TDLambdaPredictor(Agent):
         table_look_up = tuple(table_look_up)
         next_table_look_up = tuple(next_table_look_up)
         self.time_steps_counter[table_look_up] += 1
-        self.eligibility_table[table_look_up] +=1
+        if self.hyperparams['traces'] == 'dutch':
+            learning_rate = self.hyperparams['learning_rate'] if self.hyperparams['learning_rate'] else\
+                (1 / self.time_steps_counter[tuple(table_look_up)])
+            self.eligibility_table[table_look_up] = (1 - learning_rate) * self.eligibility_table[table_look_up] + 1
+        elif self.hyperparams['traces'] == 'replacing':
+            self.eligibility_table[table_look_up] = 1
+        else:
+            self.eligibility_table[table_look_up] +=1
+
         eligible = np.argwhere(self.eligibility_table > 0)
         s_t = self.table[next_table_look_up]
         s_t_1 = self.table[table_look_up]
@@ -207,12 +216,73 @@ class TDLambdaPredictor(Agent):
 
             self.table[tuple(element)] += learning_rate * (reward + self.hyperparams['discount_rate'] * s_t - s_t_1) * \
                                                            self.eligibility_table[tuple(element)]
-            self.eligibility_table[tuple(element)] *= self.hyperparams['lambda'] * self.hyperparams['discount_rate']
+            self.eligibility_table[tuple(element)] *= self.hyperparams['_lambda'] * self.hyperparams['discount_rate']
 
         if terminal:
             self.eligibility_table = np.zeros_like(self.time_steps_counter)
 
 
+class SarsaLambda(TDLambdaPredictor):
+
+    __TABLES_file = 'SarsaLambda_'
+
+    def __init__(self, environment, table_type='q'):
+        super().__init__(environment,  table_type=table_type)
+        self.hyperparams['epsilon_start'] = 1
+        self.hyperparams['epsilon_min'] = 0.05
+        self.hyperparams['epsilon_decay'] = 0.995
+
+    def evaluate_state(self, observation, reward, terminal, action, next_state, next_action=None):
+        pass
+
+
 if __name__ == '__main__':
 
-    pass
+    class FixAgent(TDLambdaPredictor):
+
+        def follow_policy(self, observation, *args):
+            if observation[0] > 19:
+                return 0
+            else:
+                return 1
+
+
+    def run_experiment(env, agent, episodes, show, save=None, collect_rewards=None, train=True):
+        rewards = []
+        average_rewards = []
+        for episode in range(episodes):
+            if (episode + 1) % show==0:
+                print('Episode {0}:'.format(episode + 1))
+                env.render()
+
+            state, reward, terminal, _ = env.reset()
+            while not terminal:
+                action = agent.follow_policy(state)
+                next_state, reward, terminal, _ = env.step(action)
+                if train:
+                    agent.evaluate_state(state, reward, terminal, action, next_state)
+
+                state = next_state
+
+            rewards.append(reward)
+
+            if save:
+                if (episode + 1) % save==0:
+                    agent.save_table()
+
+            if collect_rewards:
+                if (episode + 1) % collect_rewards==0:
+                    average_reward = sum(rewards[-collect_rewards:]) / collect_rewards
+                    average_rewards.append(average_reward)
+
+        return average_rewards
+
+
+    env = HitStand()
+    td_agent = FixAgent(env)
+    td_agent.set_hyperparams(_lambda=0.5)
+    EPISODES = 10_000
+    SHOW_EVERY = 10_000
+    SAVE_EVERY = None
+    COLLECT_EVERY = 1_000
+    results = run_experiment(env, td_agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
