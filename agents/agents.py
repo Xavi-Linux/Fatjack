@@ -56,7 +56,8 @@ class Agent:
                                                 [self.environment.action_space_len]))
 
         self.table_type= table_type
-        self.hyperparams = {'discount_rate': 1, 'learning_rate': 1}
+        self.hyperparams = {'discount_rate': 1,
+                            'learning_rate': None}
         self.save_at_episodes = []
         self.current_table_path = ''
         self.num_executed_episodes = 0
@@ -105,9 +106,11 @@ class Agent:
         table_indexes = observation - np.array(self.environment.observation_space_low)
         return list(table_indexes)
 
-    @staticmethod
-    def incremental_average(current_average, new_value, num_observations):
-        return current_average + (1/num_observations) * (new_value - current_average)
+    def incremental_average(self, current_average, new_value, num_observations):
+        if self.hyperparams['learning_rate']:
+            return current_average + self.hyperparams['learning_rate'] * (new_value - current_average)
+        else:
+            return current_average + (1/num_observations) * (new_value - current_average)
 
     def set_hyperparams(self, **args):
         for k in args:
@@ -173,8 +176,116 @@ class MontecarloController(MonteCarloPredictor):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
-        
+
+
+class TDLambdaPredictor(Agent):
+
+    __TABLES_file = 'TDLambdaPredictor_'
+
+    def __init__(self, environment, table_type='v'):
+        super().__init__(environment,  table_type=table_type, table_init='null')
+        self.hyperparams['_lambda'] = 1
+        self.hyperparams['traces'] = 'accumulating'
+        self.eligibility_table = np.zeros_like(self.time_steps_counter)
+
+    def evaluate_state(self, observation, reward, terminal, action, next_state):
+        table_look_up = self.table_look_up(observation)
+        next_table_look_up = self.table_look_up(next_state)
+        if self.table_type == 'q':
+            table_look_up = table_look_up + [action]
+            if terminal:
+                next_table_look_up = next_table_look_up + [0]
+            else:
+                next_table_look_up = next_table_look_up + [self.follow_policy(next_state)]
+
+        table_look_up = tuple(table_look_up)
+        next_table_look_up = tuple(next_table_look_up)
+        self.time_steps_counter[table_look_up] += 1
+        if self.hyperparams['traces'] == 'dutch':
+            learning_rate = self.hyperparams['learning_rate'] if self.hyperparams['learning_rate'] else\
+                (1 / self.time_steps_counter[tuple(table_look_up)])
+            self.eligibility_table[table_look_up] = (1 - learning_rate) * self.eligibility_table[table_look_up] + 1
+        elif self.hyperparams['traces'] == 'replacing':
+            self.eligibility_table[table_look_up] = 1
+        else:
+            self.eligibility_table[table_look_up] +=1
+
+        eligible = np.argwhere(self.eligibility_table > 0)
+        s_t = self.table[next_table_look_up]
+        s_t_1 = self.table[table_look_up]
+        for element in eligible:
+            learning_rate = self.hyperparams['learning_rate'] if self.hyperparams['learning_rate'] else\
+                (1/self.time_steps_counter[tuple(element)])
+
+            self.table[tuple(element)] += learning_rate * (reward + self.hyperparams['discount_rate'] * s_t - s_t_1) * \
+                                                           self.eligibility_table[tuple(element)]
+            self.eligibility_table[tuple(element)] *= self.hyperparams['_lambda'] * self.hyperparams['discount_rate']
+
+        if terminal:
+            self.eligibility_table = np.zeros_like(self.time_steps_counter)
+
+
+class SarsaLambda(TDLambdaPredictor):
+
+    __TABLES_file = 'SarsaLambda_'
+
+    def __init__(self, environment, table_type='q'):
+        super().__init__(environment,  table_type=table_type)
+        self.hyperparams['epsilon_start'] = 1
+        self.hyperparams['epsilon_min'] = 0.05
+        self.hyperparams['epsilon_decay'] = 0.995
+
 
 if __name__ == '__main__':
 
-    pass
+    def run_experiment(env, agent, episodes, show, save=None, collect_rewards=None, train=True):
+        rewards = []
+        average_rewards = []
+        for episode in range(episodes):
+            if (episode + 1) % show==0:
+                print('Episode {0}:'.format(episode + 1))
+                env.render()
+
+            state, reward, terminal, _ = env.reset()
+            while not terminal:
+                action = agent.follow_policy(state)
+                next_state, reward, terminal, _ = env.step(action)
+                if train:
+                    agent.evaluate_state(state, reward, terminal, action, next_state)
+
+                state = next_state
+
+            rewards.append(reward)
+
+            if save:
+                if (episode + 1) % save==0:
+                    agent.save_table()
+
+            if collect_rewards:
+                if (episode + 1) % collect_rewards==0:
+                    average_reward = sum(rewards[-collect_rewards:]) / collect_rewards
+                    average_rewards.append(average_reward)
+
+        return average_rewards
+
+
+    class SarsaAgent(SarsaLambda):
+        def follow_policy(self, observation, *args):
+            table_look_up = tuple(self.table_look_up(observation))
+            steps = max(np.sum(self.time_steps_counter[table_look_up][:]), 1)
+            if np.random.random() > max(self.hyperparams['epsilon_min'], self.hyperparams['epsilon_start'] / steps):
+                action = np.argmax(self.table[table_look_up][:])
+            else:
+                action = np.random.choice(self.environment.action_space)
+
+            return action
+
+    env = HitStand()
+    td_agent = SarsaAgent(env)
+
+    EPISODES = 10_000
+    SHOW_EVERY = 10_000
+    SAVE_EVERY = None
+    COLLECT_EVERY = 1_000
+
+    results = run_experiment(env, td_agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
