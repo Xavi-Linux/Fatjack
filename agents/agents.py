@@ -188,12 +188,15 @@ class TDLambdaPredictor(Agent):
         self.hyperparams['traces'] = 'accumulating'
         self.eligibility_table = np.zeros_like(self.time_steps_counter)
 
-    def evaluate_state(self, observation, reward, terminal, action, next_state, next_action=None):
+    def evaluate_state(self, observation, reward, terminal, action, next_state):
         table_look_up = self.table_look_up(observation)
         next_table_look_up = self.table_look_up(next_state)
         if self.table_type == 'q':
             table_look_up = table_look_up + [action]
-            next_table_look_up = next_table_look_up + [action]
+            if terminal:
+                next_table_look_up = next_table_look_up + [0]
+            else:
+                next_table_look_up = next_table_look_up + [self.follow_policy(next_state)]
 
         table_look_up = tuple(table_look_up)
         next_table_look_up = tuple(next_table_look_up)
@@ -232,20 +235,8 @@ class SarsaLambda(TDLambdaPredictor):
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
 
-    def evaluate_state(self, observation, reward, terminal, action, next_state, next_action=None):
-        pass
-
 
 if __name__ == '__main__':
-
-    class FixAgent(TDLambdaPredictor):
-
-        def follow_policy(self, observation, *args):
-            if observation[0] > 19:
-                return 0
-            else:
-                return 1
-
 
     def run_experiment(env, agent, episodes, show, save=None, collect_rewards=None, train=True):
         rewards = []
@@ -278,11 +269,23 @@ if __name__ == '__main__':
         return average_rewards
 
 
+    class SarsaAgent(SarsaLambda):
+        def follow_policy(self, observation, *args):
+            table_look_up = tuple(self.table_look_up(observation))
+            steps = max(np.sum(self.time_steps_counter[table_look_up][:]), 1)
+            if np.random.random() > max(self.hyperparams['epsilon_min'], self.hyperparams['epsilon_start'] / steps):
+                action = np.argmax(self.table[table_look_up][:])
+            else:
+                action = np.random.choice(self.environment.action_space)
+
+            return action
+
     env = HitStand()
-    td_agent = FixAgent(env)
-    td_agent.set_hyperparams(_lambda=0.5)
+    td_agent = SarsaAgent(env)
+
     EPISODES = 10_000
     SHOW_EVERY = 10_000
     SAVE_EVERY = None
     COLLECT_EVERY = 1_000
+
     results = run_experiment(env, td_agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
