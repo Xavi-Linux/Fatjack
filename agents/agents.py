@@ -171,8 +171,8 @@ class MontecarloController(MonteCarloPredictor):
 
     __TABLES_file = 'MonteCarloController_'
 
-    def __init__(self, environment, table_type='q'):
-        super().__init__(environment, table_type=table_type)
+    def __init__(self, environment):
+        super().__init__(environment, table_type='q')
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
@@ -382,6 +382,32 @@ class WatkinsLambda(SarsaLambda):
 
         if terminal:
             self.eligibility_table = np.zeros_like(self.time_steps_counter)
+
+
+class OffPolicyMontecarlo(MontecarloController):
+
+    def __init__(self, env):
+        super().__init__(env)
+        self.cumulative_weights = np.zeros_like(self.time_steps_counter)
+
+    def update_table(self):
+        accum_discounted_reward = 0
+        weight = 1
+        for time_step in range(len(self.current_episode_steps)-1, -1, -1):
+            reward = self.current_episode_steps[time_step]['reward'] + self.hyperparams['discount_rate'] * accum_discounted_reward
+            self.cumulative_weights[self.current_episode_steps[time_step]['observation']] += weight
+            self.time_steps_counter[self.current_episode_steps[time_step]['observation']] += 1
+            self.table[self.current_episode_steps[time_step]['observation']] = self.incremental_average(
+                                                                                   self.table[self.current_episode_steps[time_step]['observation']],
+                                                                                   reward,
+                                                                                   (self.cumulative_weights[self.current_episode_steps[time_step]['observation']]/weight))
+            target_policy = np.argmax(self.table[self.current_episode_steps[time_step]['observation'][:-1]])
+            if self.current_episode_steps[time_step]['observation'][-1] != target_policy:
+                break
+
+            weight += 1/(1/self.environment.action_space_len)
+
+            accum_discounted_reward = reward
 
 
 if __name__ == '__main__':
