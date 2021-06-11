@@ -133,6 +133,9 @@ class Agent:
         with open(path, 'wb') as f:
             pickle.dump(self, f)
 
+    def get_parent_class_str(self):
+        return self.__class__.__bases__[0].__name__
+
 
 class MonteCarloPredictor(Agent):
 
