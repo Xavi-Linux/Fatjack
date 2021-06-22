@@ -75,7 +75,8 @@ class Agent:
 
         self.table_type= table_type
         self.hyperparams = {'discount_rate': 1,
-                            'learning_rate': None}
+                            'learning_rate': None,
+                            'max_episodes': None}
         self.save_at_episodes = []
         self.current_table_path = ''
         self.num_executed_episodes = 0
