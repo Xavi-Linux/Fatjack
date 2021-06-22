@@ -200,6 +200,7 @@ class MontecarloController(MonteCarloPredictor):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
+        self.hyperparams['ucb_c'] = 1
 
 
 class QLearning(Agent):
@@ -211,6 +212,7 @@ class QLearning(Agent):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
+        self.hyperparams['ucb_c'] = 1
 
     def evaluate_state(self, observation, reward, terminal, action, next_state):
         table_look_up = self.table_look_up(observation)
@@ -236,6 +238,7 @@ class Sarsa(Agent):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
+        self.hyperparams['ucb_c'] = 1
 
     def evaluate_state(self, observation, reward, terminal, action, next_state, next_action=None):
         table_look_up = self.table_look_up(observation)
