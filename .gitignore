@@ -5,3 +5,5 @@ __pycache__/
 env/
 *.notes
 *.vscode
+var_loader.sh
+requirements.txt
