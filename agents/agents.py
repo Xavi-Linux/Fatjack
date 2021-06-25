@@ -1,9 +1,12 @@
 import numpy as np
+
+import environments
 from environments.base import HitStand
 import pickle
 from pathlib import Path
 from os.path import getctime
 from uuid import uuid4
+from dill import dump, load
 
 
 def folderpath_search(origin:Path, sought_folder:str)->Path:
@@ -13,6 +16,21 @@ def folderpath_search(origin:Path, sought_folder:str)->Path:
                 return Path(element)
 
     return folderpath_search(origin.parent, sought_folder)
+
+
+def list_saved_agents() -> list:
+    folder = folderpath_search(Path.cwd(), 'stored_agents')
+    return list(map(str,folder.iterdir()))
+
+
+def get_agent(filename:str, dilling=True):
+    with open(filename, 'rb') as f:
+        if dilling:
+            agent = load(f)
+        else:
+            agent = pickle.load(f)
+
+    return agent
 
 
 class Agent:
@@ -57,7 +75,8 @@ class Agent:
 
         self.table_type= table_type
         self.hyperparams = {'discount_rate': 1,
-                            'learning_rate': None}
+                            'learning_rate': None,
+                            'max_episodes': None}
         self.save_at_episodes = []
         self.current_table_path = ''
         self.num_executed_episodes = 0
@@ -128,10 +147,13 @@ class Agent:
     def list_saved_tables(self):
         return list(map(str, sorted(self.__TABLES_Dir.glob('T_' + self.id + '_*'),key=getctime)))
 
-    def save(self, episode):
+    def save(self, episode, dilling=True):
         path = self.__AGENTS_Dir.joinpath('A_' + self.__class__.__name__ + '_' + str(self.id) + '_' + str(episode))
         with open(path, 'wb') as f:
-            pickle.dump(self, f)
+            if dilling:
+                dump(self, f)
+            else:
+                pickle.dump(self, f)
 
     def get_parent_class_str(self):
         return self.__class__.__bases__[0].__name__
@@ -179,6 +201,7 @@ class MontecarloController(MonteCarloPredictor):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
+        self.hyperparams['ucb_c'] = 1
 
 
 class QLearning(Agent):
@@ -190,6 +213,7 @@ class QLearning(Agent):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
+        self.hyperparams['ucb_c'] = 1
 
     def evaluate_state(self, observation, reward, terminal, action, next_state):
         table_look_up = self.table_look_up(observation)
@@ -215,6 +239,7 @@ class Sarsa(Agent):
         self.hyperparams['epsilon_start'] = 1
         self.hyperparams['epsilon_min'] = 0.05
         self.hyperparams['epsilon_decay'] = 0.995
+        self.hyperparams['ucb_c'] = 1
 
     def evaluate_state(self, observation, reward, terminal, action, next_state, next_action=None):
         table_look_up = self.table_look_up(observation)
@@ -413,68 +438,3 @@ class OffPolicyMontecarlo(MontecarloController):
             accum_discounted_reward = reward
 
 
-if __name__ == '__main__':
-
-    def run_experiment(env, agent, episodes, show, save=None, collect_rewards=None, train=True):
-        rewards = []
-        average_rewards = []
-        for episode in range(episodes):
-            if (episode + 1) % show==0:
-                print('Episode {0}:'.format(episode + 1))
-                env.render()
-
-            state, reward, terminal, _ = env.reset()
-            next_action = None
-            while not terminal:
-                if next_action:
-                    action = next_action
-                else:
-                    action = agent.follow_policy(state)
-
-                next_state, reward, terminal, _ = env.step(action)
-                if not terminal:
-                    next_action = agent.follow_policy(next_state)
-                else:
-                    next_action = None
-
-                if train:
-                    agent.evaluate_state(state, reward, terminal, action, next_state, next_action)
-
-                state = next_state
-
-            rewards.append(reward)
-
-            if save:
-                if (episode + 1) % save==0:
-                    agent.save_table()
-
-            if collect_rewards:
-                if (episode + 1) % collect_rewards==0:
-                    average_reward = sum(rewards[-collect_rewards:]) / collect_rewards
-                    average_rewards.append(average_reward)
-
-        return average_rewards
-
-
-    class SarsaAgent(Sarsa):
-
-        def follow_policy(self, observation, *args):
-            table_look_up = tuple(self.table_look_up(observation))
-            steps = max(np.sum(self.time_steps_counter[table_look_up][:]), 1)
-            if np.random.random() > max(self.hyperparams['epsilon_min'],
-                    self.hyperparams['epsilon_start'] * (self.hyperparams['epsilon_decay']**steps)):
-                action = np.argmax(self.table[table_look_up][:])
-            else:
-                action = np.random.choice(self.environment.action_space)
-
-            return action
-
-    env = HitStand()
-    td_agent = SarsaAgent(env)
-
-    EPISODES = 10_000
-    SHOW_EVERY = 10_000
-    SAVE_EVERY = None
-    COLLECT_EVERY = 1_000
-
-    results = run_experiment(env, td_agent, EPISODES, SHOW_EVERY, SAVE_EVERY, COLLECT_EVERY)
