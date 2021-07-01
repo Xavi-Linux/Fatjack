@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded",function(e){
     //Reset File functions
-    document.forms["player_info"].reset();
-   
+    document.forms["agent_picker"].reset();
+   /*
     function resetAll(){
         document.querySelectorAll(".instruction").forEach(function(element){
             element.disabled = true;
@@ -29,6 +29,8 @@ document.addEventListener("DOMContentLoaded",function(e){
         return Number(value.replace(/[^0-9.-]+/g,""));
     }
 
+    */
+
     function toggleClass(element, clas, time){
         function addClass(element, clas){
             element.classList.add(clas);
@@ -39,6 +41,8 @@ document.addEventListener("DOMContentLoaded",function(e){
         addClass(element, clas);
         setTimeout(function(){removeClass(element, clas)}, time);
     }
+
+    /*
 
     function fillHand(element, array){
         array.forEach(function(item){
@@ -230,5 +234,42 @@ document.addEventListener("DOMContentLoaded",function(e){
             })
         });
     });
+
+    */
+    function notice(){
+        var picker =  document.getElementById("agents");
+        if (picker.value == ""){
+            toggleClass(picker, "red_light", 1000);
+        }        
+    }    
+    setInterval(function(){notice()}, 2000);
+
+    document.getElementById("agents").addEventListener("change", function(e){
+        if (this.value != ""){
+            var play = document.getElementById("play");
+            play.disabled = false;
+            play.classList.remove("disabled");
+            play.classList.add("enabled");
+        }
+    });
+
+    document.getElementById("agent_picker").addEventListener("submit", function(e){
+        var play = document.getElementById("play");
+        play.disabled = false;
+        play.classList.remove("enabled");
+        play.classList.add("disabled");
+
+        var stop = document.getElementById("stop");
+        stop.disabled = false;
+        stop.classList.remove("disabled");
+        stop.classList.add("enabled");
+
+        e.preventDefault();
+    });
+
+    document.getElementById("stop").addEventListener("click", function(e){
+        location.reload();
+    });
+   
     //Events - END
 });

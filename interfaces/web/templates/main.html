@@ -6,11 +6,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="author" content="Xavi-Linux">
         <title>Fatjack</title>
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Dancing+Script" />
         <link rel="stylesheet" type="text/css" href="../static/css/main.css">
         <!--<link rel="icon" href="../static/imgs/favicon.png" type="image/x-icon"> -->        
         <script type="text/javascript" src="../static/js/main.js"></script>
         <script type="text/javascript" src="../static/js/d3.v7.js"></script>
-        <script>
+        <!--<script>
             function chart(){
                 const data = [4, 8, 15, 16, 3, 42, 8, 9];
                 const width = 500;
@@ -106,14 +107,35 @@
             }
 
             const withmargins = margins();
-        </script>
+        </script>-->
     </head>
     <body>
         <header>
-            <h1>Fatjack</h1>
+            <div class="fancy_header">
+                <h1>Fatjack</h1>
+                <p>Reinforcement Learning applied to Blackjack</p>
+            </div>
         </header>
         <section>
-            <form>
+            <div id="game">
+                <div id="game_container">
+                
+                </div>
+                <div class="wooden radial">
+                    <div class="overlay radial">
+                        <h5 class="separate_content">Trained agents:</h5>
+                        <form id="agent_picker" class="separate_content">
+                            <select id="agents" form="agent_picker" autofocus class="dropdown">
+                            <option value="" selected disabled hidden>Pick an agent!</option>
+                            <option value="1">Agent 1</option>
+                            <option value="2">Agent 2</option>
+                            </select>                    
+                            <input type="submit" value="Start!" class="disabled" id="play" disabled>
+                            <input type="button" value="Stop!" class="disabled" id="stop" disabled>                         
+                        </form>
+                    </div>
+                </div>
+            <!--<form>
                 <div id="dealer">
                     <div>
                         <label>Dealer:</label>
@@ -162,18 +184,20 @@
                 </select>
                 <br>
                 <input type="submit" value="Start!" id="start">
-            </form>
-            <!--<img src="/static/img/board.jpg">-->
+            </form>-->            
+            </div>
+            <div>
+                <div id="chart">
+                    <p>Hola Hola Hola</p>
+                </div>
+            </div>
         </section>
-        <div id="chart">
-
-        </div>
         <footer>
             <p>Xavi-Linux &reg;</p>
         </footer>
     </body>
-    <script>
-        document.getElementById("chart").appendChild(element);
-        document.getElementById("chart").appendChild(withmargins);
-    </script>
+    <!--<script>
+        //document.getElementById("chart").appendChild(element);
+        //document.getElementById("chart").appendChild(withmargins);
+    </script>-->
 </html>
