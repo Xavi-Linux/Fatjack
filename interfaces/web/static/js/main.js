@@ -236,10 +236,14 @@ document.addEventListener("DOMContentLoaded",function(e){
     });
 
     */
+    document.getElementById("stop").disabled = true;
+    document.getElementById("play").disabled = true;
+
     function notice(){
         var picker =  document.getElementById("agents");
         if (picker.value == ""){
             toggleClass(picker, "red_light", 1000);
+            toggleClass(document.getElementById("pillow"), "unpillow", 1000);
         }        
     }    
     setInterval(function(){notice()}, 2000);
@@ -254,21 +258,29 @@ document.addEventListener("DOMContentLoaded",function(e){
     });
 
     document.getElementById("agent_picker").addEventListener("submit", function(e){
-        var play = document.getElementById("play");
-        play.disabled = false;
-        play.classList.remove("enabled");
-        play.classList.add("disabled");
+        var picker =  document.getElementById("agents");
+        if (picker.value != ""){
+            var play = document.getElementById("play");
+            play.disabled = true;
+            play.classList.remove("enabled");
+            play.classList.add("disabled");
 
-        var stop = document.getElementById("stop");
-        stop.disabled = false;
-        stop.classList.remove("disabled");
-        stop.classList.add("enabled");
+            var stop = document.getElementById("stop");
+            stop.disabled = false;
+            stop.classList.remove("disabled");
+            stop.classList.add("enabled");
+        }
 
         e.preventDefault();
     });
 
     document.getElementById("stop").addEventListener("click", function(e){
-        location.reload();
+            location.reload();
+    
+    });
+
+    document.getElementById("question").addEventListener("mouseover", function(e){
+
     });
    
     //Events - END

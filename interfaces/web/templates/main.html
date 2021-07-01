@@ -8,7 +8,7 @@
         <title>Fatjack</title>
         <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Dancing+Script" />
         <link rel="stylesheet" type="text/css" href="../static/css/main.css">
-        <!--<link rel="icon" href="../static/imgs/favicon.png" type="image/x-icon"> -->        
+        <link rel="icon" href="../static/img/icon.ico" type="image/x-icon">       
         <script type="text/javascript" src="../static/js/main.js"></script>
         <script type="text/javascript" src="../static/js/d3.v7.js"></script>
         <!--<script>
@@ -119,7 +119,31 @@
         <section>
             <div id="game">
                 <div id="game_container">
-                
+                    <div id="rules">  
+                        <ul>                      
+                            <li><img src="../static/img/question.png" alt="rules" id="question"></li>
+                        </ul>
+                    </div>
+                     <div class="modal" style="width: 250px;">
+                        <div class="m-header" style="width: 250px;">
+                            <h3>Rules:</h3>
+                        </div>
+                        <div class="m-content" style="width: 220px;">
+                            <ol>
+                                <li>Dealer stands on soft 17</li>
+                                <li>No Double Down</li>
+                                <li>No split</li>
+                                <li>No insurance offered</li>
+                                <li>No surrender</li>
+                                <li>Natural Blackjack 3:2</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div id="dealer_hand"></div>
+                    <p>Cards</p>
+                    <div id="action"></div>
+                    <div id="player_hand"></div>
+                    <div id="cash"></div>                
                 </div>
                 <div class="wooden radial">
                     <div class="overlay radial">
@@ -131,60 +155,11 @@
                             <option value="2">Agent 2</option>
                             </select>                    
                             <input type="submit" value="Start!" class="disabled" id="play" disabled>
-                            <input type="button" value="Stop!" class="disabled" id="stop" disabled>                         
-                        </form>
-                    </div>
-                </div>
-            <!--<form>
-                <div id="dealer">
-                    <div>
-                        <label>Dealer:</label>
-                    </div>
-                    <ul class="cards" id="dealer_hand">
-                    </ul>
-                </div>
-                <div id="players">
-                    <div>
-                        <label id="name">Player:</label>
-                    </div>
-                    <ul class="cards" id="player_hand">
-                    </ul>
-                </div>
-                <div>
-                    <input type="button" value="Hit" disabled class="instruction">
-                    <input type="button" value="Stand" disabled class="instruction">
-                </div>
-            </form>
-            <form id="bet_container">
-                <label>Next bet value:</label>
-                <input type="number" min="1" id="bet_value">
-                <br>
-                <input type="button" value="Place bet" id="bet_placer">
-            </form>
-            <div id="game_status">
-                <label>Current bet:</label>
-                <input type="text" disabled placeholder="€0.00" id="current_bet">
-                <br>
-                <label>Total Cash:</label>
-                <input type="text" disabled placeholder="€0.00" id="total_cash">
-            </div>
-            <input type="button" value="Play!" id="play">
-            <form id="player_info">
-                <label>Player's name:</label>
-                <input type="text" id="sent_name">
-                <label>Num. Players:</label>
-                <input type="number" min="1" max="1" step="1"value="1" id="num_players">
-                <br>
-                <label>Cash:</label>
-                <input type="number" min="1000" id="cash">
-                <label>Allow indebtness</label>
-                <select id="indebtness">
-                    <option>Y</option>
-                    <option>N</option>
-                </select>
-                <br>
-                <input type="submit" value="Start!" id="start">
-            </form>-->            
+                            <input type="button" value="Stop!" class="disabled" id="stop" disabled>
+                            <div id="pillow" class="pillow"></div>                        
+                        </form>                        
+                    </div>                    
+                </div>                   
             </div>
             <div>
                 <div id="chart">

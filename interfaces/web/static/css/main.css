@@ -95,6 +95,13 @@ header p {
     background-size: 550px 300px;
     width: 550px;
     height: 300px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+
+#game_container div {    
+    width: 100%;
 }
 
 .radial {
@@ -123,12 +130,14 @@ header p {
 }
 
 .enabled {
-    background-color: #076a33;
+    background-color: #024f23;
     border-color: #ffffff;
+    padding-bottom: 2px;
 }
 
 .disabled {
     background-color: #727272;
+    padding-bottom: 2px;
 }
 
 .dropdown {
@@ -145,7 +154,79 @@ header p {
     border-width: 3px;
     color: #f51f45;
     font-weight: bold;
+
 }
+
+#agent_picker {
+    margin-bottom: 3px;
+}
+
+.pillow {
+    width: 100%;
+    position: relative;
+    height: 3px;
+    display: block;
+}
+.unpillow {
+    height: 1px;
+}
+
+#rules ul li{
+    width: 20px;
+    margin: 5px 5px;
+    list-style: none;
+}
+
+#rules img {
+    background: #f51f45;
+    opacity: 0.5;
+}
+
+.modal{
+    position: absolute;
+    z-index: 1;
+    top: 5px;
+    left: 50px;
+    background-color: #ffffff;
+    border: 3px solid #5a453a8e;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: unroll;
+    animation-duration: 0.5s;
+    overflow: auto;
+    display: none;
+}
+
+.m-header {
+    background: #024f23;
+    
+}
+
+.m-header h3 {
+    margin: 4px;
+    
+}
+
+.m-content{
+    margin-top: 4px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
+
+.m-content ol li {
+    color:#024f23;
+    font-size: 12px;
+}
+
+@keyframes unroll {
+    from {width: 0px; opacity: 0}
+    to {width: 250px; opacity: 1}
+  }
+
+@keyframes roll {
+    from {width: 250px; opacity: 0}
+    to {width: 0px; opacity: 1}
+  }
 
 /*END - Game Section*/
 
