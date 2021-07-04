@@ -9,50 +9,58 @@ header,footer,hgroup,menu,nav,section {
     font-size: 100%;
     font-weight: normal;
     vertical-align: baseline;
+    box-sizing: border-box;
 }
 /*END - reset css*/
-
 /*General*/
 html {
     background-color: #024f23;
 }
-
 body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
-
 body * {
     font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
-    font-size: 16px;
     color: #ffffff;
-
+    font-size: 12px;
 }
+section {
+    width: 100%;
+}
+.big-block {
 
+    display: block;
+    position: relative;
+    width: 100%;
+}
 h1 {
     font-size: 50px;
 }
 
 h5 {
-    font: 16px;
+    font-size: 18px;
 }
 
-section {
-    margin: 10px 5px;
-    width: 95%;
+h6 {
+    font-weight: bold;
+    font-size: 16px;
 }
 
-section div {
-    display: inline-block;
-    position: relative;
-    margin: 0 0;
-    width: auto;
-}
 /*END - General*/
-
-/*Header*/
-header{
+/*Footer*/
+.xavi-linux-footer {
+    margin-top: auto;
+}  
+.xavi-linux-footer p {
+    text-align: center;
+    font-size: 8px;
+    padding: 2px;
+}  
+/*END - Footer*/
+/*HEADER*/
+.xavi-linux-header {
     position: relative;
     overflow: hidden;
     background: url(../img/header.jpg) 0 0 no-repeat;
@@ -61,248 +69,381 @@ header{
     margin: 0 0;
     width: 100%;
     border-radius: 0 0 85% 85% / 50%;
-    
-}
 
-.fancy_header {
+}
+.fancy-header {
     background-image: linear-gradient( 135deg, #225d1369 10%, #fd5e082f 50%);
     background-attachment: fixed;
-    background-attachment: cover;
 }
-
 header h1 {
     text-align: center;
     font-family: 'Dancing Script', cursive;
     padding: 5px;
 }
-
-header p {
+.fancy-header p {
     text-align: center;
-    padding: 0 5px 10px 5px;
+    padding: 0 5px 15px 5px;
 }
 /*END - Header*/
-
 /*Game Section*/
 #game {
     position: relative;
-    width: 50%;
-    height: 50%;
-    font-size: 12px;
-}
+    min-width: 100%;
 
+}
 #game_container {
     background: transparent url(../img/table.png) 0  0 no-repeat;
-    background-size: 550px 300px;
-    width: 550px;
-    height: 300px;
+    background-size: contain;
+    max-width: 100%;
+    height: auto;
+    margin: 5px 5px 10px 5px;
     position: relative;
-    margin-bottom: 10px;
+    min-height: 278px;
 }
-
-
-#game_container div {    
-    width: 100%;
-}
-
+/*END-Game Section*/
+/*Agent selector*/
 .radial {
-    border-radius: 15px 30px 15px 5px;
+    border-radius: 5% 5% 5% 0% /10% 20%;
 }
 .wooden {
     background: url(../img/wood.jpeg) 0 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;    
-    width: 550px;
-    position: relative;
+    max-width: 100%;
+    margin: 0px 5px 10px 5px;
 }
-
 .overlay {
     background-image: linear-gradient(135deg, #aa8f7dd7 10%, #5a453a8e 10%);
     background-attachment: fixed;
     background-attachment: cover;
     width: 100%;
 }
-
 .separate_content {
     padding-left: 10px;
     padding-right: 0px;
     padding-top: 20px;
     padding-bottom: 10px;
 }
-
+.nice-button{
+    padding-bottom: 2px;
+    padding-top: 2px;
+    margin-left: 5px;
+    min-width: 22%;
+    height: 25px;
+    border-radius: 10%;
+}
 .enabled {
     background-color: #024f23;
     border-color: #ffffff;
-    padding-bottom: 2px;
-}
 
+}
 .disabled {
     background-color: #727272;
-    padding-bottom: 2px;
 }
-
 .dropdown {
-    min-width: 250px;
+    min-width: 50%;
     color: #000000;
     padding: 3.5px;
-    font-size: 12px;
-
 }
-
 .red_light {
     border-color: #f51f45;
     border-style: dashed;
-    border-width: 3px;
     color: #f51f45;
     font-weight: bold;
-
 }
-
 #agent_picker {
     margin-bottom: 3px;
 }
-
 .pillow {
     width: 100%;
-    position: relative;
-    height: 3px;
-    display: block;
+    min-height: 3px;
 }
-.unpillow {
-    height: 1px;
-}
-
-#rules ul li{
-    width: 20px;
+/*END - Agent selector*/
+/*Table*/
+#rules ul {
+    width: 10%;
     margin: 5px 5px;
     list-style: none;
+    padding-top: 5px;
 }
-
-#rules img {
+#rules ul li img {
     background: #f51f45;
     opacity: 0.5;
+    max-width: 50%;
 }
-
+/*Modal*/
 .modal{
     position: absolute;
-    z-index: 1;
-    top: 5px;
-    left: 50px;
+    z-index: 1; 
+    overflow: hidden;
+    display: none;
+    top: 0px;
+    left: 0px;
+    min-width: 70%;
+}
+.modal-container {
+    margin-top: 1%;
+    margin-left: 10%;
     background-color: #ffffff;
     border: 3px solid #5a453a8e;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+.animated-modal {
+    display: block;
     animation-name: unroll;
     animation-duration: 0.5s;
-    overflow: auto;
-    display: none;
 }
-
+.unanimated-modal {
+    animation-name: roll;
+    animation-duration: 0.5s;
+}
+@keyframes unroll {
+    from {width: 0%;}
+    to {width: 70%;}
+  }
+@keyframes roll {
+    from {min-width: 70%; width: 70%;}
+    to {min-width: 0%; width: 0%;}
+  }
 .m-header {
-    background: #024f23;
-    
+    background: #024f23;        
 }
-
-.m-header h3 {
-    margin: 4px;
-    
+.m-header h6 {
+    padding-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 2px;
 }
-
 .m-content{
     margin-top: 4px;
     margin-left: 10px;
     margin-bottom: 10px;
     padding-left: 10px;
 }
-
-.m-content ol li {
+.nice-list {
+    padding-left: 5%;
+}
+.nice-list li{
     color:#024f23;
-    font-size: 12px;
+    padding: 2px;
+} 
+
+/*END - Modal*/
+/*Arena*/
+.table-linux{
+    position: relative;
 }
-
-@keyframes unroll {
-    from {width: 0px; opacity: 0}
-    to {width: 250px; opacity: 1}
-  }
-
-@keyframes roll {
-    from {width: 250px; opacity: 0}
-    to {width: 0px; opacity: 1}
-  }
-
-/*END - Game Section*/
-
-#players{
-    padding: 15px 0 10px 0;
+.player-container {
+    height: 50px;
+    position: relative;  
 }
-
+div.player-container > div{
+    display: inline-block;
+}
+.value {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    margin: 1px 0 1px 20%;
+}
+.card-holder {
+    max-width: 60%;
+    min-height: 100%;
+    padding-left: 2%;
+    margin-left: 30%;
+}
 .cards li {
     display: inline;
-    margin: 10px 5px 10px 5px;
+    margin: 0px 5px 0px 5px;
+    list-style: none;
 }
-
-input {
-    width: 120px;
+.card-img {
+    width: 32px;
+    height: auto;
 }
-
-input[type="number"]{
-    text-align: right;
-}
-
-input[type="text"]{
-    text-align: right;
-}
-
-#game_status label:nth-of-type(1){
-    margin: 0 15px 0 5px;
-}
-
-#game_status label:nth-of-type(2){
-    margin: 0 25px 0 5px;
-}
-
-#player_info {
-    visibility: hidden;
-    border-style: dashed;
-    border-width: 1px;
-    border-color: #076a33;
-    background-color: #61f7a3;
-    opacity: 0.8;
-}
-
-.err {
-    border-color: #f51f45;
+.score {
+    border: rgb(218, 124, 47);
+    border-width: 3px;
     border-style: solid;
-    border-width: 1px;
-    background-color: #ea647c;
-    opacity: 0.95;
-    padding: 3px;
-    font-size: 12px;
+    color: rgb(218, 124, 47);
+    font-weight: bolder;
+    border-radius: 50%;
+    padding: 20%;
+    text-align: center;
+    background-color: #024f23;
+    width: 75%;    
+}
+.in-linux{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.in-linux > div{
+    display: inline-block;
+    height: 100%;
+    width: 30%;
+    position: relative;
+}
+.fancy-box {
+    background-color: #687bd0eb;
+    width: 50%;
+    text-align: center;
+    border-radius: 10%;
+    height: 70%;
+    margin: auto 10% auto 20%;
+    position: absolute;
+}
+.selection-color{
+    background-color: #f51f45;
+    color: #000000;
+}
+.fancy-box p {
+    padding-top: 10px;
+    font-family: "Dancing Script";
+    font-weight: bolder;
+}
+.decision-made {
+    background-color: #800416;
+    border-width: 2px;
+    border-style: solid;
+    border-color:  rgb(218, 124, 47);
+
+}
+.message-box {
+    text-align: center;
+    width: 100%;
+    text-align: center;
+    font-size: 30px;
+    position: absolute;
+    padding: 5px;
 }
 
-.high_input_text{
-    font-weight: bold;
-    color: #076a33;
+.fancy-text{
+    font-size: 28px;
+    background-color:#800416;
+    font-family: "Dancing Script";
+    animation-name: large;
+    animation-duration: 1s;
+    border-radius: 10%;
 }
+@keyframes large {
+    from {font-size: 0px;}
+    to {font-size: 28px;}
+  }
+#cash {
+    padding-top: 3.5%;
+}
+#cash div {
+    display: inline-block;
 
-#bet_container {
+}
+.invisible {
     display: none;
 }
-
-.high_border {
-    border-color: #076a33;
-    border-style: solid;
-    border-width: 2px;
+/*END- Arena*/
+/*END - Table*/
+/*LAPTOP*/
+@media only screen and (min-width: 768px) {
+    /*General*/
+    body * {
+        font-size: 16px;
+    }
+    h1 {
+        font-size: 80px;
+    }
+    h5{
+        font-size: 25px;
+    }
+    h6 {
+        font-size: 20px;
+    }    
+    .big-block {
+        display: inline-block;
+        position: relative;
+        width: 49%;
+    }
+    /*END-General*/
+    /*Header*/
+    .fancy-header-d p {
+        text-align: center;
+        padding: 0 5px 10px 5px;
+        font-size: 25px;
+    }
+    /*END-Header*/    
+    /*Game section*/
+    #game {
+        min-width: 732px;    
+    }
+    #game_container {
+        max-width: 75%;
+        min-width: 732px;
+        min-height: 400px;
+        margin: 5px 5px 10px 25px;
+    }
+    /*END - Game section*/
+    /*Agent selector*/
+    .wooden {   
+        width: 75%;
+        min-width: 732px;
+        margin: 0px 5px 10px 25px;
+    }    
+    .dropdown {
+        min-width: 350px;   
+    }
+    .nice-button{
+        height: 35px;
+    }    
+    /*END - Agent selector*/
+    /*Table*/
+    #rules ul {
+        width: 60px;
+        height: auto;
+    }
+    #rules ul li img {
+        max-width: 100%;
+        min-width: 40px;
+    }
+    /*Modal*/
+    .modal{
+        min-width: 50%
+    }
+    @keyframes unroll {
+        from {width: 0%;}
+        to {width: 50%;}
+      }
+    @keyframes roll {
+        from {width: 50%; min-width: 50%;}
+        to {width: 0%; min-width: 0%;}
+      }
+    .modal-container{
+        margin-left: 15%;
+        margin-top: 1.5%;
+    }
+    /*END - Modal*/    
+    /*Arena*/
+    .player-container {
+        height: 90px;
+    }
+    .card-img {
+        width: 50px;
+    }
+    .value{
+        width: 82px;
+        height: 82px;
+    }
+    .fancy-box{
+        height: 50%;
+    }
+    .fancy-text{
+        font-size: 38px;
+    }
+    @keyframes large {
+        from {font-size: 0px;}
+        to {font-size: 38px;}
+      }
+    /*END - Arena*/
+    /*END - Table*/
+    
+    /*END - Game Section*/   
 }
+/*END - LAPTOP*/
 
-
-/*Footer*/
-footer {
-    margin-top: auto;
-}
-
-footer p {
-    text-align: center;
-    font-size: 8px;
-    padding: 2px;
-}
-
-/*END - Footer*/

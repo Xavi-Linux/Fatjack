@@ -2,15 +2,6 @@ document.addEventListener("DOMContentLoaded",function(e){
     //Reset File functions
     document.forms["agent_picker"].reset();
    /*
-    function resetAll(){
-        document.querySelectorAll(".instruction").forEach(function(element){
-            element.disabled = true;
-        });
-        document.getElementById("total_cash").value = "€0.00";
-        document.getElementById("current_bet").value = "€0.00";
-        document.getElementById("bet_value").value = "";
-    }
-    resetAll();
     //Reset File functions - END
     //Common functions
     function removeChildren(node){
@@ -135,6 +126,7 @@ document.addEventListener("DOMContentLoaded",function(e){
     }
 
     //Common functions - END
+    */
     //AJAX Functions
     function sendInfo(method, url, async, data, callback){
         var request = new XMLHttpRequest();
@@ -156,8 +148,9 @@ document.addEventListener("DOMContentLoaded",function(e){
         ks.forEach((key, index)=>{data.append(key, obj[key]);});
         return data;
     }
-    //Ajax Functions - END
 
+    //Ajax Functions - END
+    /*
     //Events
     /////Play!
     document.getElementById("play").addEventListener("click", function(e){
@@ -243,7 +236,6 @@ document.addEventListener("DOMContentLoaded",function(e){
         var picker =  document.getElementById("agents");
         if (picker.value == ""){
             toggleClass(picker, "red_light", 1000);
-            toggleClass(document.getElementById("pillow"), "unpillow", 1000);
         }        
     }    
     setInterval(function(){notice()}, 2000);
@@ -269,6 +261,14 @@ document.addEventListener("DOMContentLoaded",function(e){
             stop.disabled = false;
             stop.classList.remove("disabled");
             stop.classList.add("enabled");
+
+            picker.setAttribute("disabled", "disabled");
+
+            document.querySelector(".invisible").classList.remove("invisible");
+            
+            sendInfo("POST", "/start", true, BuildForm({agent: picker.value}), (text)=>{
+                console.log(text);
+            });       
         }
 
         e.preventDefault();
@@ -279,9 +279,23 @@ document.addEventListener("DOMContentLoaded",function(e){
     
     });
 
-    document.getElementById("question").addEventListener("mouseover", function(e){
+    document.querySelector("#rules ul").addEventListener("mouseover", function(e){
+        var rules = document.querySelector(".modal");
+        if (!rules.classList.contains("animated-modal")){
+            rules.classList.remove("unanimated-modal");
+            rules.classList.add("animated-modal");            
+        }
+
 
     });
+
+    
+    document.querySelector(".modal").addEventListener("mouseout", function(e){
+        var rules = document.querySelector(".modal");
+        rules.classList.add("unanimated-modal");
+        setTimeout(function(){rules.classList.remove("animated-modal");}, 500);
+
+    } );
    
     //Events - END
 });

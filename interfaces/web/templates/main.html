@@ -110,43 +110,95 @@
         </script>-->
     </head>
     <body>
-        <header>
-            <div class="fancy_header">
+        <header class="xavi-linux-header">
+            <div class="fancy-header fancy-header-d">
                 <h1>Fatjack</h1>
                 <p>Reinforcement Learning applied to Blackjack</p>
             </div>
         </header>
         <section>
-            <div id="game">
+            <div id="game" class="big-block">
                 <div id="game_container">
                     <div id="rules">  
                         <ul>                      
                             <li><img src="../static/img/question.png" alt="rules" id="question"></li>
                         </ul>
                     </div>
-                     <div class="modal" style="width: 250px;">
-                        <div class="m-header" style="width: 250px;">
-                            <h3>Rules:</h3>
+                     <div class="modal">
+                         <div class="modal-container">
+                            <div class="m-header">
+                                <h6>Rules:</h6>
+                            </div>
+                            <div class="m-content">
+                                <ol class="nice-list">
+                                    <li>Dealer stands on soft 17</li>
+                                    <li>No Double Down</li>
+                                    <li>No split</li>
+                                    <li>No insurance offered</li>
+                                    <li>No surrender</li>
+                                    <li>Natural Blackjack 3:2</li>
+                                </ol>
+                            </div>
+                         </div>
+                    </div>
+                    <div class="invisible table-linux">
+                        <div id="dealer_hand" class="player-container">
+                            <div id="dealer_value" class="value">                            
+                                <div class="score">0</div>                            
+                            </div>
+                            <div id="dealer_cards" class="card-holder">
+                                <ul class="cards">
+                                    <li><img src="../static/img/cards/PNG/JC.png" class="card-img">
+                                </ul>
+                            </div>
                         </div>
-                        <div class="m-content" style="width: 220px;">
-                            <ol>
-                                <li>Dealer stands on soft 17</li>
-                                <li>No Double Down</li>
-                                <li>No split</li>
-                                <li>No insurance offered</li>
-                                <li>No surrender</li>
-                                <li>Natural Blackjack 3:2</li>
-                            </ol>
+                        
+                        <div id="action" class="player-container">
+                            <div class="in-linux">
+                                <div>
+                                    <div class="fancy-box" id="hit">
+                                        <p>HIT</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div id="result" class="message-box">
+                                        <p class="fancy-text" id="message"></p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fancy-box" id="stand">
+                                        <p>STAND</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="player_hand" class="player-container">
+                            <div id="player_value" class="value">                            
+                                <div class="score">0</div>                            
+                            </div>
+                            <div id="player_cards" class="card-holder">
+                                <ul class="cards">
+                                    <li><img src="../static/img/cards/PNG/JC.png" class="card-img"></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div id="cash" class="">
+                            <div>
+                                <p>Gains:</p>
+                                <p>Cash:</p>
+                            </div>
+                            <div>
+                                <p>€0</p>
+                                <p>€1,000</p>
+                            </div>
                         </div>
                     </div>
-                    <div id="dealer_hand"></div>
-                    <p>Cards</p>
-                    <div id="action"></div>
-                    <div id="player_hand"></div>
-                    <div id="cash"></div>                
+                                   
                 </div>
-                <div class="wooden radial">
-                    <div class="overlay radial">
+                <div class="wooden radial wooden-d radial-d">
+                    <div class="overlay radial radial-d">
                         <h5 class="separate_content">Trained agents:</h5>
                         <form id="agent_picker" class="separate_content">
                             <select id="agents" form="agent_picker" autofocus class="dropdown">
@@ -154,20 +206,20 @@
                             <option value="1">Agent 1</option>
                             <option value="2">Agent 2</option>
                             </select>                    
-                            <input type="submit" value="Start!" class="disabled" id="play" disabled>
-                            <input type="button" value="Stop!" class="disabled" id="stop" disabled>
+                            <input type="submit" value="Start!" class="disabled nice-button" id="play" disabled>
+                            <input type="button" value="Stop!" class="disabled nice-button" id="stop" disabled>
                             <div id="pillow" class="pillow"></div>                        
                         </form>                        
                     </div>                    
                 </div>                   
             </div>
-            <div>
+            <div class="big-block">
                 <div id="chart">
                     <p>Hola Hola Hola</p>
                 </div>
             </div>
         </section>
-        <footer>
+        <footer class="xavi-linux-footer">
             <p>Xavi-Linux &reg;</p>
         </footer>
     </body>
