@@ -267,7 +267,15 @@ document.addEventListener("DOMContentLoaded",function(e){
             document.querySelector(".invisible").classList.remove("invisible");
             
             sendInfo("POST", "/start", true, BuildForm({agent: picker.value}), (text)=>{
-                console.log(text);
+                var list = JSON.parse(text)
+                for (element of list){
+                    console.log(element)
+                }
+                var llista = new Array(1,2,3)
+                el = llista.shift()
+                console.log(el);
+                console.log(llista.length);
+
             });       
         }
 
@@ -276,7 +284,6 @@ document.addEventListener("DOMContentLoaded",function(e){
 
     document.getElementById("stop").addEventListener("click", function(e){
             location.reload();
-    
     });
 
     document.querySelector("#rules ul").addEventListener("mouseover", function(e){
