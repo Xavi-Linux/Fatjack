@@ -68,7 +68,7 @@ def start():
         value = request.form['agent']
         session['value'] = value
         
-        return dumps(get_generator(value))
+        return '400'
 
     return '200'
 

@@ -102,6 +102,12 @@ header h1 {
 }
 /*END-Game Section*/
 /*Agent selector*/
+.nice-centred {
+    font-family: "Dancing Script";
+    font-size: 25px;
+    text-align: center;
+    padding: 2%;
+}
 .radial {
     border-radius: 5% 5% 5% 0% /10% 20%;
 }
@@ -267,7 +273,7 @@ div.player-container > div{
     color: rgb(218, 124, 47);
     font-weight: bolder;
     border-radius: 50%;
-    padding: 20%;
+    padding: 15%;
     text-align: center;
     background-color: #024f23;
     width: 75%;    
@@ -292,7 +298,7 @@ div.player-container > div{
     margin: auto 10% auto 20%;
     position: absolute;
 }
-.selection-color{
+.selection-colour {
     background-color: #f51f45;
     color: #000000;
 }
@@ -381,6 +387,9 @@ div.player-container > div{
     }
     /*END - Game section*/
     /*Agent selector*/
+    .nice-centred{
+        font-size: 32px;
+    }
     .wooden {   
         width: 75%;
         min-width: 732px;
@@ -429,6 +438,9 @@ div.player-container > div{
     .value{
         width: 82px;
         height: 82px;
+    }
+    .score{
+        padding: 20%;
     }
     .fancy-box{
         height: 50%;

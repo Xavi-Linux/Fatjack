@@ -1,17 +1,21 @@
 document.addEventListener("DOMContentLoaded",function(e){
     //Reset File functions
     document.forms["agent_picker"].reset();
-   /*
+
     //Reset File functions - END
     //Common functions
+    
     function removeChildren(node){
         while (node.firstChild){
             node.removeChild(node.firstChild);
         }
     }
 
-    function currencyConverter(value){
-        const options = {style: "currency", currency:"EUR"};
+    function currencyConverter(value, d){
+        const options = {style: "currency",
+                         currency:"EUR",
+                         maximumFractionDigits: d, 
+                         minimumFractionDigits: d};
         const formatter = new Intl.NumberFormat("en-US", options);
         return formatter.format(value);
     }
@@ -19,8 +23,6 @@ document.addEventListener("DOMContentLoaded",function(e){
     function convertCurrency(value){
         return Number(value.replace(/[^0-9.-]+/g,""));
     }
-
-    */
 
     function toggleClass(element, clas, time){
         function addClass(element, clas){
@@ -33,16 +35,22 @@ document.addEventListener("DOMContentLoaded",function(e){
         setTimeout(function(){removeClass(element, clas)}, time);
     }
 
-    /*
+    
 
     function fillHand(element, array){
+        const imgpath = "../static/img/cards/PNG/";
         array.forEach(function(item){
             var card = document.createElement("li");
-            card.innerHTML = item;
+            var img_card =(function(){var el = document.createElement("img");
+                                   el.setAttribute("src", imgpath + item + ".png");
+                                   el.setAttribute("alt", item);
+                                   el.setAttribute("class", "card-img"); return el})();
+            
+            card.appendChild(img_card)
             element.appendChild(card);
         });
     }
-
+    /*
     function toggleBetContainer(){
         var container = document.getElementById("bet_container");
         if (container.style.display == "none" || container.style.display == ""){
@@ -266,18 +274,11 @@ document.addEventListener("DOMContentLoaded",function(e){
 
             document.querySelector(".invisible").classList.remove("invisible");
             
-            sendInfo("POST", "/start", true, BuildForm({agent: picker.value}), (text)=>{
-                var list = JSON.parse(text)
-                for (element of list){
-                    console.log(element)
-                }
-                var llista = new Array(1,2,3)
-                el = llista.shift()
-                console.log(el);
-                console.log(llista.length);
-
-            });       
-        }
+            sendInfo("POST", "/start", true, BuildForm({agent: picker.value}),(text)=>{
+                playBlackjack();
+            });
+                                                                     
+            }
 
         e.preventDefault();
     });
@@ -304,5 +305,86 @@ document.addEventListener("DOMContentLoaded",function(e){
 
     } );
    
+    function playBlackjack(){
+        sendInfo("GET", "/play", true, null, async (text)=>{
+            var hands = JSON.parse(text);
+            while (hands.length > 2) {
+                var hand = hands.shift();
+                await handleHand(hand);
+                
+            };
+        });
+    }
+
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+    const wait = 2000;
+    const current_bet = 4;
+
+    async function handleHand(hand){ 
+        var message = document.getElementById("message");
+        message.innerHTML = "Bet: €4";     
+        setTimeout(function(){message.innerHTML="";}, wait)
+        for (step in hand){
+            await handleStep(hand[step]);
+        };
+        return warning = Promise.resolve("END of HAND");
+    }
+
+    async function handleStep(step){
+        var dealer = document.querySelector("#dealer_cards .cards");
+        var player = document.querySelector("#player_cards .cards");
+        var action = step["action"];
+        var terminal = step["terminal"];
+        if (action != "-"){
+            if (action == "0"){
+                var button = document.getElementById("stand");
+            }else{
+                var button = document.getElementById("hit");              
+            }
+            toggleClass(button, "selection-colour", wait);
+        }
+        
+        await delay(wait);
+        removeChildren(dealer);
+        removeChildren(player);
+        document.querySelector("#dealer_value .score").innerHTML = step["points"][1];
+        fillHand(dealer, step["cards"][1]);
+        document.querySelector("#player_value .score").innerHTML = step['points'][0];
+        fillHand(player, step["cards"][0]);
+        if (terminal){
+            await delay(wait);
+            var reward = Number(step["reward"]);
+            var message = document.getElementById("message");
+            if (reward == 0){
+                message.innerHTML = "Draw!";
+            } else if(reward == 1){
+                message.innerHTML = "Win!";
+            } else if(reward == -1){
+                message.innerHTML = "Loss!";
+            } else if (reward == 1.5){
+                message.innerHTML= "Blackjack!"
+            }
+
+            setTimeout(function(){message.innerHTML="";}, wait);
+            moneyManager(reward, current_bet);
+            await delay(wait);
+            document.querySelector("#dealer_value .score").innerHTML = 0;
+            document.querySelector("#player_value .score").innerHTML = 0;
+            removeChildren(dealer);
+            removeChildren(player);
+        }
+        await delay(wait);
+    }
+
+    function moneyManager(reward, bet){
+        var gains = document.getElementById("gains");
+        var total = document.getElementById("total");
+        var amount = reward * bet;
+        
+        var func = (element, money) => {element.innerHTML = currencyConverter(convertCurrency(element.innerHTML) + money, 0);};
+        func(gains, amount);
+        func(total, amount);
+
+    };
     //Events - END
 });
