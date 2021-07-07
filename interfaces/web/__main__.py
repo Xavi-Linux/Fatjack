@@ -4,6 +4,7 @@ from json import load, dumps
 import numpy as np
 import environments
 from copy import deepcopy
+import pickle
 
 class Evaluator(MonteCarloPredictor):
     #greedy policy:
@@ -50,11 +51,26 @@ def run_experiment(env, agent):
 
         yield steps
 
-def get_generator(key, times=10):
+def get_generator(key, times=100):
     evaluator = clone_table(AGENTS[int(key)])
     generator = run_experiment(env, evaluator)
     pool = [next(generator) for _ in range(0, times)]
     return pool
+
+def get_results(key):
+    path = AGENTS[int(key)]
+    agent = get_agent(path)
+    id_value = agent.id
+    class_name = agent.__class__.__name__
+    filepath = '/home/xavi/Documents/Blackjack/results/results_' + class_name + "_" + str(id_value) + '_CON'
+    print(filepath)
+    try:
+        with open(filepath, 'rb') as f:
+            instance = pickle.load(f)
+        
+        return instance
+    except:
+        return None
 
 @app.route('/', methods=['GET'])
 def main():
@@ -75,8 +91,19 @@ def start():
 @app.route('/play', methods=['GET'])
 def play():
     value = int(session['value'])
-    return dumps(get_generator(value))
+    return dumps({'hands': get_generator(value)})
 
+@app.route('/results', methods=['POST'])
+def results():
+    info = dict(request.form)
+    if info:
+        value = request.form['agent']
+        session['value'] = value
+        results = get_results(value)
+        if results:
+            return results
+        else:
+            return '500'
 
 if __name__ == '__main__':
   

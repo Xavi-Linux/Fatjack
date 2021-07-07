@@ -50,91 +50,7 @@ document.addEventListener("DOMContentLoaded",function(e){
             element.appendChild(card);
         });
     }
-    /*
-    function toggleBetContainer(){
-        var container = document.getElementById("bet_container");
-        if (container.style.display == "none" || container.style.display == ""){
-            container.style.display = "block";
-            toggleClass(container, "high_border", 2000);
-        }else{
-            document.getElementById("bet_value").value = "";
-            container.style.display = "none";
-        }
-    }
-
-    function toggleError(expression, parent, message, cls){
-        var last_error = parent.querySelector(".err." + cls);
-        if (expression){
-            if (last_error == null){
-                var text_error = "<p class='err " + cls + "'>" + message + "</p>";
-                var error_element = document.createElement("p");
-                error_element.innerHTML = text_error;
-                parent.append(error_element);              
-                
-            }
-
-            return true;
-
-        }else {            
-            if (last_error != null){
-                last_error.parentNode.removeChild(last_error);
-                last_error = null;
-            }
-        }
-        return false;
-    }
-
-    function checkStatus(obj){
-        var player = document.getElementById("player_hand");
-        var name = document.getElementById("sent_name").value;
-        var dealer = document.getElementById("dealer_hand");
-
-        removeChildren(player);
-        fillHand(player, obj[name]);
-        removeChildren(dealer);
-        fillHand(dealer, obj["Dealer"]);
-
-        if (obj["Status"] != "on"){       
-            document.querySelectorAll(".instruction").forEach(function(element){
-                element.disabled = true;
-            });
-
-            toggleError(1==1, player.parentNode, obj["Status"], "outcome");
-            
-            setTimeout(function(){
-                removeChildren(player);
-                removeChildren(dealer);
-                toggleError(1==2, player.parentNode, obj["Status"], "outcome");
-                document.getElementById("total_cash").value = currencyConverter(obj["Player_cash"]);
-                document.getElementById("current_bet").value = currencyConverter(0);
-                if (obj["Continuity"] != null){
-                    gameOver(obj["Continuity"]);
-                }else {
-                    toggleBetContainer();
-                }                
-            }, 5000);           
-
-        }        
-    }
-
-    function gameOver(message){
-        alert(message);
-
-        document.getElementById("total_cash").value = currencyConverter(0);
-        document.getElementById("current_bet").value = currencyConverter(0);
-        document.getElementById("player_info").style.visibility = "hidden";
-        document.getElementById("name").innerHTML = "Player:";
-        document.getElementById("play").disabled = false;
-        document.getElementById("sent_name").value = "";
-        document.getElementById("cash").value = "";
-        document.getElementById("player_info").childNodes.forEach(function(element){
-            element.disabled = false;
-        });
-
-    }
-
-    //Common functions - END
-    */
+    //END- Common functions
     //AJAX Functions
     function sendInfo(method, url, async, data, callback){
         var request = new XMLHttpRequest();
@@ -158,85 +74,7 @@ document.addEventListener("DOMContentLoaded",function(e){
     }
 
     //Ajax Functions - END
-    /*
     //Events
-    /////Play!
-    document.getElementById("play").addEventListener("click", function(e){
-        document.getElementById("player_info").style.visibility = "visible";
-    });
-    /////Start!
-    document.getElementById("player_info").addEventListener("submit", function(e){
-        var name = document.getElementById("sent_name").value;
-        var cash = document.getElementById("cash").value;
-
-        if(toggleError(name=="", e.target, "Error! Player's name must be filled in!", "name")){
-            e.preventDefault();
-            return;
-        }
-
-        if (toggleError((cash == "" || cash < 1000 || isNaN(cash)), e.target,"Error! Cash must be greater than €1,000!", "cash")) {
-            e.preventDefault();
-            return;
-        }
-
-        sendInfo("POST", "/start", false, BuildForm({name: name, initial_cash: cash, 
-                                                     allow_debt: document.getElementById("indebtness").value}),
-                 (text)=>{});
-
-        
-        document.getElementById("name").innerHTML = name + ":";
-
-        document.getElementById("play").disabled = true;
-        
-        this.childNodes.forEach(function(element){
-            element.disabled = true;
-        });
-
-        var cash_element = document.getElementById("total_cash");
-        cash_element.value = currencyConverter(cash);
-        toggleClass(cash_element, "high_input_text", 2000);
-
-
-        toggleBetContainer();
-
-        e.preventDefault();
-    });
-    /////Place Bet
-    document.getElementById("bet_placer").addEventListener("click", function(e){
-        var bet = document.getElementById("bet_value").value;
-        var remaining_cash = document.getElementById("total_cash").value;
-        var money = convertCurrency(remaining_cash);
-        var debt = document.getElementById("indebtness").value;
-        var evaluation = (bet < 0 || bet == "" || (bet > money && debt =="N"));
-
-        if (!toggleError(evaluation, e.target.parentNode, "Bet value must be between €1 and " + remaining_cash, "bet")){
-            document.getElementById("total_cash").value = currencyConverter(money - bet);
-            document.getElementById("current_bet").value = currencyConverter(bet);            
-            document.querySelectorAll(".instruction").forEach(function(element){
-                element.disabled = false;                          
-            });
-
-            toggleBetContainer();
-
-            sendInfo("POST", "/bet", false, BuildForm({value: bet}),(text)=>{
-                    var obj = JSON.parse(text);
-                    checkStatus(obj);
-            });           
-
-        }
-    });
-
-    /////Hit & Stand
-    document.querySelectorAll(".instruction").forEach(function(element){
-        element.addEventListener("click", function(e){
-            sendInfo("POST", "/action", false, BuildForm({action: e.target.value}), (text)=>{
-                var obj = JSON.parse(text);
-                checkStatus(obj);
-            })
-        });
-    });
-
-    */
     document.getElementById("stop").disabled = true;
     document.getElementById("play").disabled = true;
 
@@ -277,7 +115,12 @@ document.addEventListener("DOMContentLoaded",function(e){
             sendInfo("POST", "/start", true, BuildForm({agent: picker.value}), (text)=>{
                 playBlackjack();
             });
-                                                                     
+
+            sendInfo("POST", "/results", true, BuildForm({agent: picker.value}), (text)=>{
+                var data = JSON.parse(text);
+                console.log(Object.values(data));}
+            );
+                                         
             }
 
         e.preventDefault();
@@ -318,8 +161,6 @@ document.addEventListener("DOMContentLoaded",function(e){
 
 
     }
-
-
 
     const delay = ms => new Promise(res => setTimeout(res, ms));
     const wait = 2000;
@@ -391,5 +232,9 @@ document.addEventListener("DOMContentLoaded",function(e){
         func(total, amount);
 
     };
+
+    function retrieveResults(){
+
+    }
     //Events - END
 });
