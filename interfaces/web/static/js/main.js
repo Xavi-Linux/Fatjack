@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded",function(e){
 
             document.querySelector(".invisible").classList.remove("invisible");
             
-            sendInfo("POST", "/start", true, BuildForm({agent: picker.value}),(text)=>{
+            sendInfo("POST", "/start", true, BuildForm({agent: picker.value}), (text)=>{
                 playBlackjack();
             });
                                                                      
@@ -306,15 +306,20 @@ document.addEventListener("DOMContentLoaded",function(e){
     } );
    
     function playBlackjack(){
+
         sendInfo("GET", "/play", true, null, async (text)=>{
-            var hands = JSON.parse(text);
-            while (hands.length > 2) {
+             var hands = JSON.parse(text)['hands'];
+             while (hands.length > 0) {
                 var hand = hands.shift();
-                await handleHand(hand);
-                
-            };
+                await handleHand(hand);};
+            playBlackjack();
+                    
         });
+
+
     }
+
+
 
     const delay = ms => new Promise(res => setTimeout(res, ms));
     const wait = 2000;
