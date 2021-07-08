@@ -17,8 +17,8 @@ class Evaluator(MonteCarloPredictor):
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = b"7l\xe37\xaf,\x9b\t\x9c\x9f\x18\xe2'xM\xd9"
 
-AGENTS = {1: list_saved_agents()[10],
-          2: list_saved_agents()[11]
+AGENTS = {1: list_saved_agents()[25],
+          2: list_saved_agents()[26]
           }
 
 env = environments.make('hitstand')

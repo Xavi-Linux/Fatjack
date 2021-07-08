@@ -117,9 +117,10 @@ document.addEventListener("DOMContentLoaded",function(e){
             });
 
             sendInfo("POST", "/results", true, BuildForm({agent: picker.value}), (text)=>{
-                var data = JSON.parse(text);
-                console.log(Object.values(data));}
-            );
+                var obj = JSON.parse(text);
+                var data = transformData(obj);
+                lineChart("rewards", data);                
+            });
                                          
             }
 
@@ -233,8 +234,5 @@ document.addEventListener("DOMContentLoaded",function(e){
 
     };
 
-    function retrieveResults(){
-
-    }
     //Events - END
 });
