@@ -20,7 +20,10 @@ def folderpath_search(origin:Path, sought_folder:str)->Path:
 
 def list_saved_agents() -> list:
     folder = folderpath_search(Path.cwd(), 'stored_agents')
-    return list(map(str,folder.iterdir()))
+    return list(map(str,
+                    sorted(folder.iterdir(),
+                           key=lambda p: p.stat().st_mtime)
+                    ))
 
 
 def get_agent(filename:str, dilling=True):
