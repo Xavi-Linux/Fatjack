@@ -1,12 +1,53 @@
 @charset "utf-8";
 
-.chart{
-    position: absolute;
+text{
+    font-size: 8px;
+}
+.chart {
     max-width: 100%;
     max-height: 100%;
     height: auto;
+    width: 100%;
+    min-height: 278px;
+}
+.chart-content {
+    position: absolute;
+    top: 5px;
+    width: 95%;
+    height: 100%;
+}
+.main-line {
+   fill: none; 
+   stroke: #800416;
+   stroke-width: 2px;
+}
+.confidence {
+    stroke-width: 1px;
+    stroke: #d8946083 ;
+    stroke-dasharray: 5,5;
+    fill: #9078699e;
+}
+.grid line {
+    stroke: #dddcdc;
+    stroke-opacity: 0.7;
+    stroke-width: 1px;
+}
+.grid path{
+    stroke-width: 0;
+}
+.fancy-circle {
+    stroke: none;
+    fill: #001d7c;
 }
 
 @media only screen and (min-width: 768px) {
-    
+    text {
+        font-size: 12px;
+    }
+    .chart{
+        min-height: 400px;
+    }
+    .main-line{
+        stroke-width: 3px;
+     }  
 }

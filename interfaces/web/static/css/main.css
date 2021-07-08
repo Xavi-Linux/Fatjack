@@ -30,7 +30,6 @@ section {
     width: 100%;
 }
 .big-block {
-
     display: block;
     position: relative;
     width: 100%;
@@ -366,6 +365,9 @@ div.player-container > div{
         display: inline-block;
         position: relative;
         width: 49%;
+    }
+    .left-big-block{
+        float: left;
     }
     /*END-General*/
     /*Header*/
