@@ -1,9 +1,76 @@
-from flask import Flask, render_template, request
-from games.blackjacks import Blackjack
+from flask import Flask, render_template, request, session
+from agents.agents import MonteCarloPredictor, get_agent, list_saved_agents
 from json import load, dumps
+import numpy as np
+import environments
+from copy import deepcopy
+import pickle
+
+class Evaluator(MonteCarloPredictor):
+    #greedy policy:
+    def follow_policy(self, observation, *args):
+        table_look_up = tuple(self.table_look_up(observation))
+        action = np.argmax(self.table[table_look_up][:])
+        
+        return action
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-game = Blackjack()
+app.secret_key = b"7l\xe37\xaf,\x9b\t\x9c\x9f\x18\xe2'xM\xd9"
+
+AGENTS = {1: list_saved_agents()[25],
+          2: list_saved_agents()[26]
+          }
+
+env = environments.make('hitstand')
+
+def clone_table(route):
+    agent = get_agent(route)
+    evaluator = Evaluator(env)
+    evaluator.table = agent.table.copy()
+    return evaluator
+
+def run_experiment(env, agent):
+    keys = ('points', 'reward', 'terminal', 'cards', 'action')
+    while True:
+        i=0
+        steps={}
+        outcome = env.reset()
+        outcome = list(outcome)
+        outcome[3] = deepcopy(outcome[3])
+        summary = dict(zip(keys, outcome + ['-']))
+        
+        steps[i] = summary
+        while not outcome[2]:
+            action = agent.follow_policy(outcome[0])
+            outcome = env.step(action)
+            outcome = list(outcome)
+            outcome[3] = deepcopy(outcome[3]) 
+            summary = dict(zip(keys, outcome + [int(action)]))
+            i+=1
+            steps[i] = summary
+
+        yield steps
+
+def get_generator(key, times=100):
+    evaluator = clone_table(AGENTS[int(key)])
+    generator = run_experiment(env, evaluator)
+    pool = [next(generator) for _ in range(0, times)]
+    return pool
+
+def get_results(key):
+    path = AGENTS[int(key)]
+    agent = get_agent(path)
+    id_value = agent.id
+    class_name = agent.__class__.__name__
+    filepath = '/home/xavi/Documents/Blackjack/results/results_' + class_name + "_" + str(id_value) + '_CON'
+    print(filepath)
+    try:
+        with open(filepath, 'rb') as f:
+            instance = pickle.load(f)
+        
+        return instance
+    except:
+        return None
 
 @app.route('/', methods=['GET'])
 def main():
@@ -14,71 +81,29 @@ def main():
 def start():
     info = dict(request.form)
     if info:
-        info['initial_cash'] = float(info['initial_cash'])
-        info['allow_debt'] = True if ['allow_debt'] == 'Y' else False        
-        game.setup_players([info])
-        game.start()
-
+        value = request.form['agent']
+        session['value'] = value
+        
         return '400'
 
     return '200'
 
+@app.route('/play', methods=['GET'])
+def play():
+    value = int(session['value'])
+    return dumps({'hands': get_generator(value)})
 
-@app.route('/bet', methods=['POST'])
-def bet():
-    bet = float(request.form['value'])
-    game.alive_players[0].place_bet(bet)
-    game.start_round()
-    hand_players = game.retrieve_hands_alive()
-    state = {game.alive_players[0].name: game.alive_players[0].current_hand.card_names,
-            'Dealer': game.croupier_hand.card_names,
-            'Player_value': game.alive_players[0].current_hand.best_value,
-            'Dealer_value': game.croupier_hand.best_value,
-            'Status': 'on',
-            'Player_gains': game.alive_players[0].gains,
-            'Player_cash': game.alive_players[0].cash,
-            'Continuity': None
-            }
-    if len(hand_players) == 0:
-        croupier_hand = game.get_croupier_hand()
-        state['Dealer'] = croupier_hand.card_names
-        state['Dealer_value'] = croupier_hand.best_value
-        state['Status'] = game.resolve_round(game.alive_players[0]).upper()
-        state['Player_gains'] = game.alive_players[0].gains
-        state['Player_cash'] = game.alive_players[0].cash
-        state['Continuity'] = game.assess_continuity()
-
-    return dumps(state)
-
-
-@app.route('/action', methods=['POST'])
-def action():
-    action = request.form['action']
-    game.send_action(game.alive_players[0], action)
-
-    hand_players = game.retrieve_hands_alive()
-    state = {game.alive_players[0].name:game.alive_players[0].current_hand.card_names,
-            'Dealer':game.croupier_hand.card_names,
-            'Player_value':game.alive_players[0].current_hand.best_value,
-            'Dealer_value':game.croupier_hand.best_value,
-            'Status':'on',
-            'Player_gains':game.alive_players[0].gains,
-            'Player_cash':game.alive_players[0].cash,
-            'Continuity':None
-            }
-    if len(hand_players)==0:
-        if not game.alive_players[0].current_hand.is_busted:
-            croupier_hand = game.get_croupier_hand()
-            state['Dealer'] = croupier_hand.card_names
-            state['Dealer_value'] = croupier_hand.best_value
-
-        state['Status'] = game.resolve_round(game.alive_players[0]).upper()
-        state['Player_gains'] = game.alive_players[0].gains
-        state['Player_cash'] = game.alive_players[0].cash
-        state['Continuity'] = game.assess_continuity()
-
-    return dumps(state)
-
+@app.route('/results', methods=['POST'])
+def results():
+    info = dict(request.form)
+    if info:
+        value = request.form['agent']
+        session['value'] = value
+        results = get_results(value)
+        if results:
+            return results
+        else:
+            return '500'
 
 if __name__ == '__main__':
   

@@ -20,7 +20,10 @@ def folderpath_search(origin:Path, sought_folder:str)->Path:
 
 def list_saved_agents() -> list:
     folder = folderpath_search(Path.cwd(), 'stored_agents')
-    return list(map(str,folder.iterdir()))
+    return list(map(str,
+                    sorted(folder.iterdir(),
+                           key=lambda p: p.stat().st_mtime)
+                    ))
 
 
 def get_agent(filename:str, dilling=True):
@@ -216,6 +219,9 @@ class QLearning(Agent):
         self.hyperparams['ucb_c'] = 1
 
     def evaluate_state(self, observation, reward, terminal, action, next_state):
+        if terminal:
+            self.num_executed_episodes+=1
+
         table_look_up = self.table_look_up(observation)
         next_table_look_up = self.table_look_up(next_state)
         table_look_up = tuple(table_look_up + [action])
@@ -247,6 +253,7 @@ class Sarsa(Agent):
         table_look_up = tuple(table_look_up + [action])
         if terminal:
             next_table_look_up = tuple(next_table_look_up + [0])
+            self.num_executed_episodes+=1
         else:
             if next_action:
                 next_table_look_up = tuple(next_table_look_up + [next_action])
