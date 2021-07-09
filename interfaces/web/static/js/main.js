@@ -11,19 +11,6 @@ document.addEventListener("DOMContentLoaded",function(e){
         }
     }
 
-    function currencyConverter(value, d){
-        const options = {style: "currency",
-                         currency:"EUR",
-                         maximumFractionDigits: d, 
-                         minimumFractionDigits: d};
-        const formatter = new Intl.NumberFormat("en-US", options);
-        return formatter.format(value);
-    }
-
-    function convertCurrency(value){
-        return Number(value.replace(/[^0-9.-]+/g,""));
-    }
-
     function toggleClass(element, clas, time){
         function addClass(element, clas){
             element.classList.add(clas);

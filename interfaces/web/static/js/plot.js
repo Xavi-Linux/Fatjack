@@ -70,27 +70,46 @@ function lineChart(container_id, data){
       .enter().append("circle")
       .attr("r", Math.floor(height/125))
       .attr("class", "fancy-circle")
+      .attr("id", function(d){return d.episodes})
       .attr("cx", function(d) { return x(tweakLog(d.episodes)); })
       .attr("cy", function(d) { return y(d.mean); });
 
       document.querySelectorAll(".fancy-circle").forEach(function(element){
         element.addEventListener("mouseover", function(e){
-            console.log(getXInvert(e.target.getAttribute("cx")));
+           var target = filterArrayObjs(data, e.target.getAttribute("id"))[0];
+           var tooltip = renderTooltip(target);
+
+           tooltip.style.top = e.layerY + "px";
+           var tooltipWidth = Number(getComputedStyle(tooltip).maxWidth.replace(/px$/, ''));
+           var pagepos = e.layerX + 200;
+           var screenWidth = width*0.95;
+           var ratio = (function(){
+             var minMax = (screen.width-364)/(1672-364);
+             return 0.6 + (0.75-0.6)*minMax;
+           })();
+           if (pagepos < screenWidth){
+              tooltip.style.left = e.layerX + "px";
+           }else if(pagepos >= screenWidth){
+            tooltip.style.left = (e.layerX*ratio) + "px";
+           }
+            
+           
+           document.getElementById(container_id).appendChild(tooltip);
+
+           
         });
+
+        element.addEventListener("mouseout", function(e){
+            document.querySelectorAll(".tooltip").forEach(function(element){
+              var ratio = (function(){
+                var minMax = (screen.width-364)/(1672-364);
+                return minMax;
+              })();
+              element.addEventListener("click",function(e){element.remove()});
+              setTimeout(()=>{element.remove()}, 500/ratio);});
+        });
+
     });
-
-    function getXInvert(xval){
-      if (xval != 0){
-        return Math.pow(10,x.invert(xval));
-      } else{
-        return 0;
-      }
-      
-    }
-
-    function getYInvert(yval){
-      return y.invert(yval);
-    }
 }
 
 function tweakLog(value){
@@ -98,3 +117,47 @@ function tweakLog(value){
   return isFinite(l) ? l : 0;
 }
 
+function renderTooltip(obj) {
+  var container = document.createElement("div");
+  container.setAttribute("class", "tooltip");
+  var textNodes = document.createElement("div");
+
+  var episodesText = document.createElement("p");
+  episodesText.innerText = "Num. Episodes:";
+  var meanText = document.createElement("p");
+  meanText.innerText = "Mean(€):";
+  var lbText = document.createElement("p");
+  lbText.innerText = "CI LB(95%)(€):";
+  var ubText = document.createElement("p");
+  ubText.innerText = "CI UB(95%)(€):"
+
+  textNodes.appendChild(episodesText);
+  textNodes.appendChild(meanText);
+  textNodes.appendChild(lbText);
+  textNodes.appendChild(ubText);
+  
+  var ValueNodes = document.createElement("div");
+
+  var episodesValue = document.createElement("p");
+  episodesValue.innerText = niceNumber(obj.episodes, 0);
+  var meanValue = document.createElement("p");
+  meanValue.innerText = niceNumber(obj.mean, 4);
+  var lbValue = document.createElement("p");
+  lbValue.innerText = niceNumber(obj.lb, 4);
+  var ubValue = document.createElement("p");
+  ubValue.innerText = niceNumber(obj.ub,4);         
+  
+  ValueNodes.appendChild(episodesValue);
+  ValueNodes.appendChild(meanValue);
+  ValueNodes.appendChild(lbValue);
+  ValueNodes.appendChild(ubValue);
+
+  container.appendChild(textNodes);
+  container.appendChild(ValueNodes);
+
+  return container;
+}
+
+function filterArrayObjs(data, value){
+  return data.filter(function (el){return el.episodes == value;})
+}

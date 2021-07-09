@@ -39,15 +39,32 @@ text{
     stroke: none;
     fill: #001d7c;
 }
-
+.tooltip {
+    background: linear-gradient(135deg, #000 75%, #7d7474 90%);
+    position: absolute;
+    border-radius: 5%/40%;
+    opacity: 0.8;
+    z-index: 1;
+    max-width: 200px;
+}
+.tooltip div {
+    display: inline-block;
+    padding: 10px 10px 10px 10px;
+}
+.tooltip div p {
+    font-size: 8px;
+}
 @media only screen and (min-width: 768px) {
     text {
         font-size: 12px;
     }
-    .chart{
+    .chart {
         min-height: 400px;
     }
-    .main-line{
+    .main-line {
         stroke-width: 3px;
-     }  
+     }
+    .tooltip div p {
+        font-size: 12px;
+    }  
 }
