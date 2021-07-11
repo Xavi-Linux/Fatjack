@@ -7,6 +7,8 @@ from pathlib import Path
 from os.path import getctime
 from uuid import uuid4
 from dill import dump, load
+import re
+from functools import reduce
 
 
 def folderpath_search(origin:Path, sought_folder:str)->Path:
@@ -18,15 +20,48 @@ def folderpath_search(origin:Path, sought_folder:str)->Path:
     return folderpath_search(origin.parent, sought_folder)
 
 
-def list_saved_agents() -> list:
+def list_saved_agents(filter=None) -> list:
+    def cut_id(file):
+        expression = re.compile('A_[a-zA-Z]+_[a-g0-9]{32}_')
+        results = expression.search(file.name).span()
+        return file.name[:results[1]-1]
+
     folder = folderpath_search(Path.cwd(), 'stored_agents')
-    return list(map(str,
-                    sorted(folder.iterdir(),
-                           key=lambda p: p.stat().st_mtime)
+    if not filter:
+        return list(map(str,
+                        sorted(folder.iterdir(),
+                               key=lambda p: p.stat().st_mtime)
                     ))
 
+    if filter == 'unique':
+        return list(set(map(cut_id, folder.iterdir())))
 
-def get_agent(filename:str, dilling=True):
+
+def get_agent(filename:str, dilling=True, criterion=None):
+    def mtime_reducer(a, b):
+        return a if Path(a).stat().st_mtime > Path(b).stat().st_mtime else b
+
+    def episode_reducer(a,b):
+        expression = re.compile('A_[a-zA-Z]+_[a-g0-9]{32}_')
+        results_a = expression.search(str(a)).end()
+        results_b = expression.search(str(b)).end()
+
+        return a if int(str(a)[results_a+1:]) > int(str(b)[results_b+1]) else b
+
+    def get_full_path(folder, file):
+        files = list(folder.glob(file + '_*'))
+        if len(files) == 1:
+            return files[0]
+        else:
+            if criterion == 'most_recent':
+                return reduce(mtime_reducer, files)
+            elif criterion == 'most_trained':
+                return reduce(episode_reducer, files)
+
+    folderpath= folderpath_search(Path.cwd(), 'stored_agents')
+    if not criterion is None:
+        filename = str(get_full_path(folderpath,filename))
+
     with open(filename, 'rb') as f:
         if dilling:
             agent = load(f)
@@ -445,3 +480,5 @@ class OffPolicyMontecarlo(MontecarloController):
             accum_discounted_reward = reward
 
 
+if __name__ == '__main__':
+    get_agent(list_saved_agents(filter='unique')[320],criterion='most_recent')
