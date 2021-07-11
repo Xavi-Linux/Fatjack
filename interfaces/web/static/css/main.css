@@ -148,6 +148,7 @@ header h1 {
     min-width: 50%;
     color: #000000;
     padding: 3.5px;
+    max-width: 200px;
 }
 .red_light {
     border-color: #f51f45;
@@ -397,7 +398,7 @@ div.player-container > div{
         margin: 0px 5px 10px 25px;
     }    
     .dropdown {
-        min-width: 350px;   
+        max-width: 350px;   
     }
     .nice-button{
         height: 35px;

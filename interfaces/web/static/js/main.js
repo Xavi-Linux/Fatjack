@@ -77,6 +77,7 @@ document.addEventListener("DOMContentLoaded",function(e){
     //Events
     document.getElementById("stop").disabled = true;
     document.getElementById("play").disabled = true;
+    document.getElementById("false").checked = true;
 
     function notice(){
         var picker =  document.getElementById("agents");
@@ -143,7 +144,6 @@ document.addEventListener("DOMContentLoaded",function(e){
                     elem.addEventListener("change", function(event) {
                       var item = event.target.value;
                       removeChildren(document.getElementById("policy"));
-                      console.log(item);
                       ace = item == "true" ? true : false;
                       heatMap("policy", data, ace);
                     });

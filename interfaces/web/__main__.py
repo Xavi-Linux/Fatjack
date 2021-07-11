@@ -18,14 +18,12 @@ class Evaluator(MonteCarloPredictor):
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = b"7l\xe37\xaf,\x9b\t\x9c\x9f\x18\xe2'xM\xd9"
 
-AGENTS = {1: list_saved_agents()[25],
-          2: list_saved_agents()[26]
-          }
+AGENTS = [ a for a in list_saved_agents(filter='unique')]
 
 env = environments.make('hitstand')
 
 def clone_table(route):
-    agent = get_agent(route)
+    agent = get_agent(route, criterion='most_trained')
     evaluator = Evaluator(env)
     evaluator.table = agent.table.copy()
     return evaluator
@@ -53,18 +51,16 @@ def run_experiment(env, agent):
         yield steps
 
 def get_generator(key, times=100):
-    evaluator = clone_table(AGENTS[int(key)])
+    evaluator = clone_table(key)
     generator = run_experiment(env, evaluator)
     pool = [next(generator) for _ in range(0, times)]
     return pool
 
 def get_results(key):
-    path = AGENTS[int(key)]
-    agent = get_agent(path)
+    agent = get_agent(key, criterion='most_trained')
     id_value = agent.id
     class_name = agent.__class__.__name__
     filepath = '/home/xavi/Documents/Blackjack/results/results_' + class_name + "_" + str(id_value) + '_CON'
-    print(filepath)
     try:
         with open(filepath, 'rb') as f:
             instance = pickle.load(f)
@@ -74,20 +70,22 @@ def get_results(key):
         return None
 
 def get_table(key, full=True):
-    path = AGENTS[int(key)]
-    agent = get_agent(path)
+    agent = get_agent(key, criterion='most_trained')
     tables = agent.list_saved_tables()
     table = agent.load_table(filename=tables[-1], overwrite=False)
+    
     if full:
         policy_table = np.argmax(table[:18,:10,:], axis=3)
     else:
         policy_table = np.argmax(table[7:18,:10,:], axis=3)
 
+    policy_table[:8,:,1] = 1
+
     return policy_table.tolist()
 
 @app.route('/', methods=['GET'])
 def main():
-    return render_template('main.html')
+    return render_template('main.html', agents=AGENTS)
 
 
 @app.route('/start', methods=['POST'])
@@ -103,7 +101,7 @@ def start():
 
 @app.route('/play', methods=['GET'])
 def play():
-    value = int(session['value'])
+    value = session['value']
     return dumps({'hands': get_generator(value)})
 
 @app.route('/results', methods=['POST'])

@@ -109,8 +109,10 @@
                         <form id="agent_picker" class="separate_content">
                             <select id="agents" form="agent_picker" autofocus class="dropdown">
                             <option value="" selected disabled hidden>Pick an agent!</option>
-                            <option value="1">Agent 1</option>
-                            <option value="2">Agent 2</option>
+                            {% for agent in agents%}
+                            <option value={{agent}}>{{agent}}</option>
+                            
+                            {% endfor %}
                             </select>                    
                             <input type="submit" value="Start!" class="disabled nice-button" id="play" disabled>
                             <input type="button" value="Stop!" class="disabled nice-button" id="stop" disabled>
