@@ -120,7 +120,6 @@ header h1 {
 .overlay {
     background-image: linear-gradient(135deg, #aa8f7dd7 10%, #5a453a8e 10%);
     background-attachment: fixed;
-    background-attachment: cover;
     width: 100%;
 }
 .separate_content {

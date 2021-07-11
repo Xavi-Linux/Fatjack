@@ -1,14 +1,16 @@
 @charset "utf-8";
 
 text{
-    font-size: 8px;
+    font-size: 10px;
 }
 .chart {
     max-width: 100%;
     max-height: 100%;
     height: auto;
     width: 100%;
-    min-height: 278px;
+    min-height: 285px;
+    position: relative;
+    margin: 0 0 15px 5px;
 }
 .chart-content {
     position: absolute;
@@ -54,17 +56,86 @@ text{
 .tooltip div p {
     font-size: 8px;
 }
+.highlight-rect{
+    stroke: #ffffff;
+    stroke-width: 3px;
+}
+.relbar{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.hit-bar{
+    background-color: #800416;
+}
+.stand-bar{
+    background-color: #687bd0eb;
+}
+.sidebar{
+    margin: 20px;
+    position: absolute;
+    top: 85%;
+    width: 85%
+}
+.sidebar-value { 
+    height: 100%;
+    width: 50%;
+    display: inline-block;
+  
+}
+.sidebar-value p {
+    padding-left: 70px;
+    letter-spacing: 5px;
+    letter-spacing: 5px;
+
+}
+.lefted {
+    padding-left: 30%;
+}
+.title h5 {
+    padding: 0;
+}
 @media only screen and (min-width: 768px) {
     text {
-        font-size: 12px;
+        font-size: 14px;
     }
     .chart {
-        min-height: 400px;
+        min-height: 350px;
     }
     .main-line {
         stroke-width: 3px;
      }
     .tooltip div p {
         font-size: 12px;
-    }  
+    }
+    .sidebar{
+        display: block;
+        left: 96%;
+        height: 100%;
+        width: 4%;
+        position: absolute;
+        margin: 0;
+        top: 0;
+    }
+    .sidebar-value { 
+        height: 50%;
+        width: 100%;
+        display: block;
+      
+    }
+    .sidebar-value p {
+        padding-top: 60px;
+        padding-left: 8px;
+        letter-spacing: 5px;
+        writing-mode: vertical-lr;
+        text-orientation: upright;
+    }
+    .title {
+        position: relative;
+        width: 100%;
+        margin-top: 5px;
+    }
+    .lefted{
+        padding-left: 40%;
+    }
 }

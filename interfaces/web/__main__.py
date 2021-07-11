@@ -1,3 +1,4 @@
+from types import MethodDescriptorType
 from flask import Flask, render_template, request, session
 from agents.agents import MonteCarloPredictor, get_agent, list_saved_agents
 from json import load, dumps
@@ -72,6 +73,18 @@ def get_results(key):
     except:
         return None
 
+def get_table(key, full=True):
+    path = AGENTS[int(key)]
+    agent = get_agent(path)
+    tables = agent.list_saved_tables()
+    table = agent.load_table(filename=tables[-1], overwrite=False)
+    if full:
+        policy_table = np.argmax(table[:18,:10,:], axis=3)
+    else:
+        policy_table = np.argmax(table[7:18,:10,:], axis=3)
+
+    return policy_table.tolist()
+
 @app.route('/', methods=['GET'])
 def main():
     return render_template('main.html')
@@ -104,6 +117,14 @@ def results():
             return results
         else:
             return '500'
+
+@app.route('/policy', methods=['POST'])
+def policy():
+    info = dict(request.form)
+    if info: 
+        value = session['value']
+        return dumps(get_table(value))
+
 
 if __name__ == '__main__':
   

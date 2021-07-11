@@ -120,7 +120,24 @@
                 </div>                   
             </div>
             <div class="big-block">
+                <div class="wooden radial title invisible" id="rewards_title">
+                    <div class="overlay radial">
+                        <h5 class="nice-centred">Expected average reward per betted unit</h5>
+                    </div>                    
+                </div>
                 <div class="chart" id="rewards"></div>
+                <div class="wooden radial title invisible" id="policy_title">
+                    <div class="overlay radial">
+                        <h5 class="nice-centred">Policy after</h5>
+                    </div>                    
+                    <div class="overlay radial lefted">
+                        <span>Usable ace?</span>
+                        <input type="radio" id="true" name="ace" value="true">
+                        <label for="true">Y</label>
+                        <input type="radio" id="false" name="ace" value="false" selected>
+                        <label for="false">N</label>
+                    </div>
+                </div>
                 <div class="chart" id="policy"></div>
             </div>
         </section>
