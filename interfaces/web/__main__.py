@@ -6,6 +6,8 @@ import numpy as np
 import environments
 from copy import deepcopy
 import pickle
+import pathlib
+import re
 
 class Evaluator(MonteCarloPredictor):
     #greedy policy:
@@ -21,6 +23,71 @@ app.secret_key = b"7l\xe37\xaf,\x9b\t\x9c\x9f\x18\xe2'xM\xd9"
 AGENTS = [ a for a in list_saved_agents(filter='unique')]
 
 env = environments.make('hitstand')
+
+def get_features(route):
+    def translate_null(value, lr=False):
+        if value:
+            return value
+
+        else:
+            if lr:
+                return '1/visits'
+
+            else:
+                return 'N/A'
+    
+    def rename(feats_dict):
+        regex_ucb = re.compile('UCB')
+        if regex_ucb.search(feats_dict['strategy']):
+            feats_dict['ep_min'] = 'N/A'
+            feats_dict['ep_decay'] = 'N/A'
+            feats_dict['strategy'] = 'Upper bound confidence'
+        else:
+            feats_dict['ucb'] ='N/A'
+
+            regex_fixep = re.compile('FixEpsilon')
+            if regex_fixep.search(feats_dict['strategy']):
+               feats_dict['strategy'] = 'E-Greedy'
+               feats_dict['ep_decay'] = 'N/A'
+
+            regex_decay = re.compile('DecayRate')
+            if regex_decay.search(feats_dict['strategy']):
+                feats_dict['strategy'] = 'E-Greedy with decay rate'
+            
+            regex_visits = re.compile('VisitsDecay')
+            if regex_visits.search(feats_dict['strategy']):
+               feats_dict['strategy'] = 'E-Greedy 1/visits decay'
+               feats_dict['ep_decay'] = 'N/A'
+            
+            regex_visits = re.compile('GreedyOff')
+            if regex_visits.search(feats_dict['strategy']):
+               feats_dict['strategy'] = 'E-greedy'
+               feats_dict['ep_decay'] = 'N/A'
+            
+            regex_visits = re.compile('Random')
+            if regex_visits.search(feats_dict['strategy']):
+               feats_dict['strategy'] = 'Random play'
+               feats_dict['ep_decay'] = 'N/A'
+               feats_dict['ep_min'] = 'N/A'
+            
+        if feats_dict['algorithm'] ==  'MontecarloController':
+            feats_dict['algorithm'] = 'Every visit Montecarlo'
+
+        return feats_dict
+
+    agent = get_agent(route, criterion='most_trained')
+    features = {'algorithm': agent.get_parent_class_str(),
+                'strategy': agent.__class__.__name__,
+                'lr': translate_null(agent.hyperparams.get('learning_rate'), True),
+                'dr': translate_null(agent.hyperparams.get('discount_rate')),
+                'lambda': translate_null(agent.hyperparams.get('_lambda')),
+                'traces': translate_null(agent.hyperparams.get('traces')),
+                'ep_min': translate_null(agent.hyperparams.get('epsilon_min')),
+                'ep_decay': translate_null(agent.hyperparams.get('epsilon_decay')),
+                'ucb': translate_null(agent.hyperparams.get('ucb_c')),
+                }
+    
+    return rename(features)
 
 def clone_table(route):
     agent = get_agent(route, criterion='most_trained')
@@ -57,6 +124,12 @@ def get_generator(key, times=100):
     return pool
 
 def get_results(key):
+    def find_results(class_name, id_value):
+        folder_path = '/home/xavi/Documents/Blackjack/results'
+        regx = 'results_{0}_{1}_*'.format(class_name, id_value)
+        folder = pathlib.Path(folder_path)
+        return list(folder.glob(regx))
+
     agent = get_agent(key, criterion='most_trained')
     id_value = agent.id
     class_name = agent.__class__.__name__
@@ -67,7 +140,14 @@ def get_results(key):
         
         return instance
     except:
-        return None
+        try:
+            filepath = find_results(class_name, id_value)[-1]
+            with open(filepath, 'rb') as f:
+                instance = pickle.load(f)
+        
+            return instance
+        except:
+            return None
 
 def get_table(key, full=True):
     agent = get_agent(key, criterion='most_trained')
@@ -94,8 +174,8 @@ def start():
     if info:
         value = request.form['agent']
         session['value'] = value
-        
-        return '400'
+        features = get_features(value)
+        return dumps(features)
 
     return '200'
 
@@ -120,7 +200,8 @@ def results():
 def policy():
     info = dict(request.form)
     if info: 
-        value = session['value']
+        value = request.form['agent']
+        session['value'] = value
         return dumps(get_table(value))
 
 

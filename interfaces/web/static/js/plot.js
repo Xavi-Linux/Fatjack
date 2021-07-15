@@ -144,7 +144,7 @@ function lineChart(container_id, data){
   sVg.selectAll("dot")
       .data(data)
       .enter().append("circle")
-      .attr("r", Math.floor(height/125))
+      .attr("r", 3)
       .attr("class", "fancy-circle")
       .attr("id", function(d){return d.episodes})
       .attr("cx", function(d) { return x(tweakLog(d.episodes)); })
@@ -154,6 +154,8 @@ function lineChart(container_id, data){
         element.addEventListener("mouseover", function(e){
            var target = filterArrayObjs(data, e.target.getAttribute("id"))[0];
            var tooltip = renderTooltip(target);
+           
+          element.setAttribute("r", 4);
 
            tooltip.style.top = e.layerY + "px";
            var tooltipWidth = Number(getComputedStyle(tooltip).maxWidth.replace(/px$/, ''));
@@ -183,6 +185,7 @@ function lineChart(container_id, data){
               })();
               element.addEventListener("click",function(e){element.remove()});
               setTimeout(()=>{element.remove()}, 500/ratio);});
+              element.setAttribute("r", 3);
         });
 
     });

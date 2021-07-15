@@ -114,6 +114,11 @@ document.addEventListener("DOMContentLoaded",function(e){
             document.querySelector(".invisible").classList.remove("invisible");
             
             sendInfo("POST", "/start", true, BuildForm({agent: picker.value}), (text)=>{
+                var features = JSON.parse(text);
+                Object.keys(features).forEach((k, i)=>{
+                    document.getElementsByName(k).forEach((el)=>{el.value = features[k];el.readOnly=true;});
+                });
+                document.querySelector(".nice-features").classList.add("animated-features");
                 playBlackjack();
             });
 
@@ -125,7 +130,9 @@ document.addEventListener("DOMContentLoaded",function(e){
                     removeChildren(document.getElementById("rewards"));
                     lineChart("rewards", data);
                 });
-               
+                
+                var maxEpisodes = Math.max(...Object.values(data).map((d)=>{return d.episodes}));
+                document.getElementById("policy_header").innerHTML = "Policy after " + niceNumber(maxEpisodes, 0) + " episodes"
             });
 
             sendInfo("POST", "/policy", true, BuildForm({agent: picker.value}),(text)=>{
@@ -133,6 +140,7 @@ document.addEventListener("DOMContentLoaded",function(e){
                 var data = transformMatrix(obj);
                 var ace = selectedRadioButton(document.querySelectorAll('input[name="ace"]'));
                 ace = ace == "true" ? true : false;
+                
                 heatMap("policy", data, ace);
                 window.addEventListener("resize", function(e){
                     removeChildren(document.getElementById("policy"));
