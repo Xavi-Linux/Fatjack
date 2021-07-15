@@ -367,6 +367,7 @@ class SarsaLambda(Sarsa):
 
         if terminal:
             next_table_look_up = tuple(next_table_look_up + [0])
+            self.num_executed_episodes += 1
         else:
             if next_action:
                 next_table_look_up = tuple(next_table_look_up + [next_action])
@@ -417,9 +418,11 @@ class WatkinsLambda(SarsaLambda):
         best_action = np.argmax(self.table[tuple(next_table_look_up)][:])
         if terminal:
             next_table_look_up = tuple(next_table_look_up + [0])
+            self.num_executed_episodes += 1
         else:
             if next_action:
                 next_table_look_up = tuple(next_table_look_up + [best_action])
+
             else:
                 return None
 
