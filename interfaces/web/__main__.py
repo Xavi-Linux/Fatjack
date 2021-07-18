@@ -61,7 +61,7 @@ def get_features(route):
             
             regex_visits = re.compile('GreedyOff')
             if regex_visits.search(feats_dict['strategy']):
-               feats_dict['strategy'] = 'E-greedy'
+               feats_dict['strategy'] = 'E-Greedy'
                feats_dict['ep_decay'] = 'N/A'
             
             regex_visits = re.compile('Random')
