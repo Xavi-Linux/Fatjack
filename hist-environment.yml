@@ -1,0 +1,17 @@
+name: /home/xavi/Documents/Blackjack/env
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy
+  - seaborn
+  - pandas
+  - matplotlib
+  - gym
+  - jupyterlab
+  - statsmodels
+  - flask
+  - scikit-learn
+  - dill
+  - pip
+prefix: /home/xavi/Documents/Blackjack/env
