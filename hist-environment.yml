@@ -1,4 +1,4 @@
-name: /home/xavi/Documents/Blackjack/env
+name: Fatjack
 channels:
   - defaults
 dependencies:
@@ -7,7 +7,6 @@ dependencies:
   - seaborn
   - pandas
   - matplotlib
-  - gym
   - jupyterlab
   - statsmodels
   - flask
