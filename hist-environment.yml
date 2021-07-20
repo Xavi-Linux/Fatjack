@@ -1,0 +1,16 @@
+name: Fatjack
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy
+  - seaborn
+  - pandas
+  - matplotlib
+  - jupyterlab
+  - statsmodels
+  - flask
+  - scikit-learn
+  - dill
+  - pip
+prefix: /home/xavi/Documents/Blackjack/env

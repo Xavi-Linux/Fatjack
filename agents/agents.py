@@ -7,6 +7,8 @@ from pathlib import Path
 from os.path import getctime
 from uuid import uuid4
 from dill import dump, load
+import re
+from functools import reduce
 
 
 def folderpath_search(origin:Path, sought_folder:str)->Path:
@@ -18,15 +20,102 @@ def folderpath_search(origin:Path, sought_folder:str)->Path:
     return folderpath_search(origin.parent, sought_folder)
 
 
-def list_saved_agents() -> list:
+def find_results(class_name, id_value, just_consolidated=False):
+    folder_path = folderpath_search(Path.cwd(), 'results')
+    if just_consolidated:
+        regx = 'results_{0}_{1}_CON'.format(class_name, id_value)
+    else:
+        regx = 'results_{0}_{1}_*'.format(class_name, id_value)
+    folder = Path(folder_path)
+
+    return list(sorted(folder.glob(regx), key=lambda p: p.stat().st_mtime))
+
+
+def consolidate_results(agent, override=False):
+    folder_path = folderpath_search(Path.cwd(), 'results')
+
+    def consolidate(paths):
+        def dict_reducer(left, right):
+            target = left.copy()
+            target.update(right)
+            return target
+
+        instances = []
+        regx = re.compile('_CON$')
+        for path in paths:
+            if regx.search(str(path)):
+                pass
+            else:
+                with open(path, 'rb') as f:
+                    instances.append(pickle.load(f))
+
+        new_dict = reduce(dict_reducer, instances)
+        return new_dict
+
+    def save_consolidated(dict_results, class_name, id_value):
+        filename = 'results_{0}_{1}_CON'.format(class_name, id_value)
+        with open(str(folder_path) + '/' + filename, 'wb') as f:
+            pickle.dump(dict_results, f)
+
+    def already_consolidated(paths):
+        regx = re.compile('_CON$')
+        for path in paths:
+            if regx.search(str(path)):
+                return True
+        return False
+
+    files = find_results(agent.__class__.__name__, agent.id)
+    if len(files) == 0:
+        return None
+    if already_consolidated(files) and not override:
+        return None
+
+    consolidated_dict = consolidate(files)
+    save_consolidated(consolidated_dict, agent.__class__.__name__, agent.id)
+
+
+def list_saved_agents(filter=None) -> list:
+    def cut_id(file):
+        expression = re.compile('A_[a-zA-Z]+_[a-g0-9]{32}_')
+        results = expression.search(file.name).span()
+        return file.name[:results[1]-1]
+
     folder = folderpath_search(Path.cwd(), 'stored_agents')
-    return list(map(str,
-                    sorted(folder.iterdir(),
-                           key=lambda p: p.stat().st_mtime)
+    if not filter:
+        return list(map(str,
+                        sorted(folder.iterdir(),
+                               key=lambda p: p.stat().st_mtime)
                     ))
 
+    if filter == 'unique':
+        return list(set(map(cut_id, folder.iterdir())))
 
-def get_agent(filename:str, dilling=True):
+
+def get_agent(filename:str, dilling=True, criterion=None):
+    def mtime_reducer(a, b):
+        return a if Path(a).stat().st_mtime > Path(b).stat().st_mtime else b
+
+    def episode_reducer(a,b):
+        expression = re.compile('A_[a-zA-Z]+_[a-g0-9]{32}_')
+        results_a = expression.search(str(a)).end()
+        results_b = expression.search(str(b)).end()
+
+        return a if int(str(a)[results_a:]) > int(str(b)[results_b:]) else b
+
+    def get_full_path(folder, file):
+        files = list(folder.glob(file + '_*'))
+        if len(files) == 1:
+            return files[0]
+        else:
+            if criterion == 'most_recent':
+                return reduce(mtime_reducer, files)
+            elif criterion == 'most_trained':
+                return reduce(episode_reducer, files)
+
+    folderpath= folderpath_search(Path.cwd(), 'stored_agents')
+    if not criterion is None:
+        filename = str(get_full_path(folderpath,filename))
+
     with open(filename, 'rb') as f:
         if dilling:
             agent = load(f)
@@ -332,6 +421,7 @@ class SarsaLambda(Sarsa):
 
         if terminal:
             next_table_look_up = tuple(next_table_look_up + [0])
+            self.num_executed_episodes += 1
         else:
             if next_action:
                 next_table_look_up = tuple(next_table_look_up + [next_action])
@@ -382,9 +472,11 @@ class WatkinsLambda(SarsaLambda):
         best_action = np.argmax(self.table[tuple(next_table_look_up)][:])
         if terminal:
             next_table_look_up = tuple(next_table_look_up + [0])
+            self.num_executed_episodes += 1
         else:
             if next_action:
                 next_table_look_up = tuple(next_table_look_up + [best_action])
+
             else:
                 return None
 
@@ -443,5 +535,4 @@ class OffPolicyMontecarlo(MontecarloController):
             weight += 1/(1/self.environment.action_space_len)
 
             accum_discounted_reward = reward
-
 

@@ -109,18 +109,77 @@
                         <form id="agent_picker" class="separate_content">
                             <select id="agents" form="agent_picker" autofocus class="dropdown">
                             <option value="" selected disabled hidden>Pick an agent!</option>
-                            <option value="1">Agent 1</option>
-                            <option value="2">Agent 2</option>
+                            {% for agent in agents%}
+                            <option value={{agent}}>{{agent}}</option>
+                            
+                            {% endfor %}
                             </select>                    
                             <input type="submit" value="Start!" class="disabled nice-button" id="play" disabled>
                             <input type="button" value="Stop!" class="disabled nice-button" id="stop" disabled>
                             <div id="pillow" class="pillow"></div>                        
-                        </form>                        
+                        </form>
+                        <div class="nice-features">
+                            <div>
+                                <label for="algorithm">Algorithm:</label>
+                                <input type="text" name="algorithm">
+                            </div> 
+                            <div>
+                                <label for="strategy">Exploration strategy:</label>
+                                <input type="text" name="strategy">
+                            </div>                           
+                            <div>
+                                <label for="lr">Learning rate:</label>
+                                <input type="text" name="lr">
+                            </div>
+                            <div>
+                                <label for="dr">Discount rate:</label>
+                                <input type="text" name="dr">
+                            </div>                            
+                            <div>
+                                <label for="ep_min">Minimum Epsilon rate:</label>
+                                <input type="text" name="ep_min">
+                            </div>
+                            <div>
+                                <label for="ep_decay">Epsilon decay rate:</label>
+                                <input type="text" name="ep_decay">
+                            </div>
+                            <div>
+                                <label for="lambda">Lambda:</label>
+                                <input type="text" name="lambda">
+                            </div>                            
+                            <div>
+                                <label for="traces">Traces:</label>
+                                <input type="text" name="traces">
+                            </div>
+                            <div>
+                                <label for="ucb">Upper bound confidence c:</label>
+                                <input type="text" name="ucb">
+                            </div>                                                        
+                        </div>                        
                     </div>                    
                 </div>                   
             </div>
             <div class="big-block">
+                <div class="wooden title invisible" id="rewards_title">
+                    <div class="overlay">
+                        <h5 class="nice-centred">Expected average reward per betted unit</h5>
+                    </div>                    
+                </div>
                 <div class="chart" id="rewards"></div>
+                <div class="wooden title invisible" id="policy_title">
+                    <div class="overlay">
+                        <div>
+                            <h5 class="nice-centred" id='policy_header'>Policy after</h5>
+                        </div>                    
+                        <div class="lefted">
+                            <span>Usable ace?</span>
+                            <input type="radio" id="true" name="ace" value="true">
+                            <label for="true">Y</label>
+                            <input type="radio" id="false" name="ace" value="false" selected>
+                            <label for="false">N</label>
+                        </div>
+                    </div>
+                </div>
                 <div class="chart" id="policy"></div>
             </div>
         </section>

@@ -7,3 +7,6 @@ env/
 *.vscode
 var_loader.sh
 requirements.txt
+00_RandomPolicy.ipynb
+Playing.ipynb
+/interfaces/web/templates/main copy.html

@@ -5,6 +5,16 @@ document.addEventListener("DOMContentLoaded",function(e){
     //Reset File functions - END
     //Common functions
     
+    function selectedRadioButton(buttons){
+        var target = null;
+        buttons.forEach(function(el){
+            if (el.checked){
+                target = el.value;
+            }
+        });
+        return target;
+    }
+    
     function removeChildren(node){
         while (node.firstChild){
             node.removeChild(node.firstChild);
@@ -12,14 +22,17 @@ document.addEventListener("DOMContentLoaded",function(e){
     }
 
     function toggleClass(element, clas, time){
-        function addClass(element, clas){
-            element.classList.add(clas);
+        if (element != null){
+            function addClass(element, clas){
+                element.classList.add(clas);
+            }
+            function removeClass(element, clas){
+                element.classList.remove(clas);
+            }
+            addClass(element, clas);
+            setTimeout(function(){removeClass(element, clas)}, time);
         }
-        function removeClass(element, clas){
-            element.classList.remove(clas);
-        }
-        addClass(element, clas);
-        setTimeout(function(){removeClass(element, clas)}, time);
+
     }
 
     
@@ -64,6 +77,7 @@ document.addEventListener("DOMContentLoaded",function(e){
     //Events
     document.getElementById("stop").disabled = true;
     document.getElementById("play").disabled = true;
+    document.getElementById("false").checked = true;
 
     function notice(){
         var picker =  document.getElementById("agents");
@@ -100,6 +114,11 @@ document.addEventListener("DOMContentLoaded",function(e){
             document.querySelector(".invisible").classList.remove("invisible");
             
             sendInfo("POST", "/start", true, BuildForm({agent: picker.value}), (text)=>{
+                var features = JSON.parse(text);
+                Object.keys(features).forEach((k, i)=>{
+                    document.getElementsByName(k).forEach((el)=>{el.value = features[k];el.readOnly=true;});
+                });
+                document.querySelector(".nice-features").classList.add("animated-features");
                 playBlackjack();
             });
 
@@ -111,8 +130,37 @@ document.addEventListener("DOMContentLoaded",function(e){
                     removeChildren(document.getElementById("rewards"));
                     lineChart("rewards", data);
                 });
-               
+                
+                var maxEpisodes = Math.max(...Object.values(data).map((d)=>{return d.episodes}));
+                document.getElementById("policy_header").innerHTML = "Policy after " + niceNumber(maxEpisodes, 0) + " episodes"
             });
+
+            sendInfo("POST", "/policy", true, BuildForm({agent: picker.value}),(text)=>{
+                var obj = JSON.parse(text);
+                var data = transformMatrix(obj);
+                var ace = selectedRadioButton(document.querySelectorAll('input[name="ace"]'));
+                ace = ace == "true" ? true : false;
+                
+                heatMap("policy", data, ace);
+                window.addEventListener("resize", function(e){
+                    removeChildren(document.getElementById("policy"));
+                    heatMap("policy", data, ace);
+                    
+                });
+
+                document.querySelectorAll('input[name="ace"]').forEach((elem) => {
+                    elem.addEventListener("change", function(event) {
+                      var item = event.target.value;
+                      removeChildren(document.getElementById("policy"));
+                      ace = item == "true" ? true : false;
+                      heatMap("policy", data, ace);
+                    });
+                  });
+                
+            });
+
+            document.getElementById("policy_title").classList.remove("invisible");
+            document.getElementById("rewards_title").classList.remove("invisible");
                                          
             }
 
@@ -181,8 +229,9 @@ document.addEventListener("DOMContentLoaded",function(e){
                 var button = document.getElementById("hit");              
             }
             toggleClass(button, "selection-colour", wait);
+            
         }
-        
+
         await delay(wait);
         removeChildren(dealer);
         removeChildren(player);
@@ -190,6 +239,9 @@ document.addEventListener("DOMContentLoaded",function(e){
         fillHand(dealer, step["cards"][1]);
         document.querySelector("#player_value .score").innerHTML = step['points'][0];
         fillHand(player, step["cards"][0]);
+
+        toggleClass(document.getElementById(step["points"][0]+"-"+step["points"][1]+"-"+step["points"][2]),"highlight-rect", wait);
+
         if (terminal){
             await delay(wait);
             var reward = Number(step["reward"]);
@@ -223,6 +275,8 @@ document.addEventListener("DOMContentLoaded",function(e){
         var func = (element, money) => {element.innerHTML = currencyConverter(convertCurrency(element.innerHTML) + money, 0);};
         func(gains, amount);
         func(total, amount);
+    
+
 
     };
 
