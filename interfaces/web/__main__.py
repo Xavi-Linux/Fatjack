@@ -151,6 +151,7 @@ def get_table(key, full=True):
 
     return policy_table.tolist()
 
+
 @app.route('/', methods=['GET'])
 def main():
     return render_template('main.html', agents=AGENTS)
@@ -167,10 +168,12 @@ def start():
 
     return '200'
 
+
 @app.route('/play', methods=['GET'])
 def play():
     value = session['value']
     return dumps({'hands': get_generator(value)})
+
 
 @app.route('/results', methods=['POST'])
 def results():
@@ -183,6 +186,7 @@ def results():
             return results
         else:
             return '500'
+
 
 @app.route('/policy', methods=['POST'])
 def policy():
