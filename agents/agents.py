@@ -20,6 +20,60 @@ def folderpath_search(origin:Path, sought_folder:str)->Path:
     return folderpath_search(origin.parent, sought_folder)
 
 
+def find_results(class_name, id_value, just_consolidated=False):
+    folder_path = folderpath_search(Path.cwd(), 'results')
+    if just_consolidated:
+        regx = 'results_{0}_{1}_CON'.format(class_name, id_value)
+    else:
+        regx = 'results_{0}_{1}_*'.format(class_name, id_value)
+    folder = Path(folder_path)
+
+    return list(sorted(folder.glob(regx), key=lambda p: p.stat().st_mtime))
+
+
+def consolidate_results(agent, override=False):
+    folder_path = folderpath_search(Path.cwd(), 'results')
+
+    def consolidate(paths):
+        def dict_reducer(left, right):
+            target = left.copy()
+            target.update(right)
+            return target
+
+        instances = []
+        regx = re.compile('_CON$')
+        for path in paths:
+            if regx.search(str(path)):
+                pass
+            else:
+                with open(path, 'rb') as f:
+                    instances.append(pickle.load(f))
+
+        new_dict = reduce(dict_reducer, instances)
+        return new_dict
+
+    def save_consolidated(dict_results, class_name, id_value):
+        filename = 'results_{0}_{1}_CON'.format(class_name, id_value)
+        with open(str(folder_path) + '/' + filename, 'wb') as f:
+            pickle.dump(dict_results, f)
+
+    def already_consolidated(paths):
+        regx = re.compile('_CON$')
+        for path in paths:
+            if regx.search(str(path)):
+                return True
+        return False
+
+    files = find_results(agent.__class__.__name__, agent.id)
+    if len(files) == 0:
+        return None
+    if already_consolidated(files) and not override:
+        return None
+
+    consolidated_dict = consolidate(files)
+    save_consolidated(consolidated_dict, agent.__class__.__name__, agent.id)
+
+
 def list_saved_agents(filter=None) -> list:
     def cut_id(file):
         expression = re.compile('A_[a-zA-Z]+_[a-g0-9]{32}_')
@@ -46,7 +100,7 @@ def get_agent(filename:str, dilling=True, criterion=None):
         results_a = expression.search(str(a)).end()
         results_b = expression.search(str(b)).end()
 
-        return a if int(str(a)[results_a+1:]) > int(str(b)[results_b+1]) else b
+        return a if int(str(a)[results_a:]) > int(str(b)[results_b:]) else b
 
     def get_full_path(folder, file):
         files = list(folder.glob(file + '_*'))
@@ -482,6 +536,3 @@ class OffPolicyMontecarlo(MontecarloController):
 
             accum_discounted_reward = reward
 
-
-if __name__ == '__main__':
-    get_agent(list_saved_agents(filter='unique')[320],criterion='most_recent')

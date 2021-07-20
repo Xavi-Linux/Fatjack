@@ -1,6 +1,6 @@
 from types import MethodDescriptorType
 from flask import Flask, render_template, request, session
-from agents.agents import MonteCarloPredictor, get_agent, list_saved_agents
+from agents.agents import MonteCarloPredictor, get_agent, list_saved_agents, find_results
 from json import load, dumps
 import numpy as np
 import environments
@@ -124,30 +124,18 @@ def get_generator(key, times=100):
     return pool
 
 def get_results(key):
-    def find_results(class_name, id_value):
-        folder_path = '/home/xavi/Documents/Blackjack/results'
-        regx = 'results_{0}_{1}_*'.format(class_name, id_value)
-        folder = pathlib.Path(folder_path)
-        return list(folder.glob(regx))
-
     agent = get_agent(key, criterion='most_trained')
     id_value = agent.id
     class_name = agent.__class__.__name__
-    filepath = '/home/xavi/Documents/Blackjack/results/results_' + class_name + "_" + str(id_value) + '_CON'
+    filepath = find_results(class_name, id_value, True)
     try:
+        filepath = str(filepath[0])
         with open(filepath, 'rb') as f:
             instance = pickle.load(f)
         
         return instance
     except:
-        try:
-            filepath = find_results(class_name, id_value)[-1]
-            with open(filepath, 'rb') as f:
-                instance = pickle.load(f)
-        
-            return instance
-        except:
-            return None
+        return None
 
 def get_table(key, full=True):
     agent = get_agent(key, criterion='most_trained')
