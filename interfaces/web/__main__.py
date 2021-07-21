@@ -20,8 +20,34 @@ class Evaluator(MonteCarloPredictor):
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = b"7l\xe37\xaf,\x9b\t\x9c\x9f\x18\xe2'xM\xd9"
 
-AGENTS = [ a for a in list_saved_agents(filter='unique')]
+TOP =  ['A_FixEpsilon_1694735483da4ee5aa0b4e0c020a5225',
+ 'A_QDecayRate_41eb1831b3fd43d5aab3e5b38422208a',
+ 'A_QVisitsDecay_a448d79b4b5b45258103e111d1c1f490',
+ 'A_DecayRate_a81ffac6ceef4e7abbedab434b11dca6',
+ 'A_QVisitsDecay_6cfb7d8b6df64593a88c8de054bebedd',
+ 'A_QVisitsDecay_c688b215e42e40daa54c2249040a9a39',
+ 'A_QVisitsDecay_a08b71ff7c0749618027631507a49bbf',
+ 'A_QDecayRate_b798d2c5acd64e658f52d0be9169d01e',
+ 'A_FixEpsilon_31bad91b04084908852b5c283cb2cf08',
+ 'A_FixEpsilon_1b720ec52e6640e298a3b41eeb9043f4']
 
+def exceptions(value):
+    exceps = ['A_FixEpsilon_fd1f72645ff54bda8d657bc204415c66',
+    'A_UCB_c53ebd1c23634775a8d0e3a79ccaeac5',
+    'A_UCB_253fabab6dc54090adb37a71a16e2b5a',
+    'A_FixEpsilon_1e2748d2c9dc4b25940dca10393f47f2',
+    'A_VisitsDecay_3c6267913c894118a9e60bc796652cc7',
+    'A_UCB_d9546ca2809d43e4b8b5be4a5d5c33ac',
+    'A_UCB_341235ec2ac7476981f9be3281506c7a',
+    'A_DecayRate_2923aed748004df4819f142b64433e8e',
+    'A_AlwaysGreedy_3cab8bb2ecd94981bd57c46af642e9f8']
+    if value in exceps:
+        return False
+    else:
+        return True
+
+OTHERS = list(filter(exceptions,[ a for a in list_saved_agents(filter='unique')]))
+AGENTS = [ a for a in TOP]
 env = environments.make('hitstand')
 
 def get_features(route):
@@ -139,8 +165,7 @@ def get_results(key):
 
 def get_table(key, full=True):
     agent = get_agent(key, criterion='most_trained')
-    tables = agent.list_saved_tables()
-    table = agent.load_table(filename=tables[-1], overwrite=False)
+    table = agent.table.copy()
     
     if full:
         policy_table = np.argmax(table[:18,:10,:], axis=3)
@@ -154,7 +179,7 @@ def get_table(key, full=True):
 
 @app.route('/', methods=['GET'])
 def main():
-    return render_template('main.html', agents=AGENTS)
+    return render_template('main.html', agents=AGENTS, others=OTHERS)
 
 
 @app.route('/start', methods=['POST'])
