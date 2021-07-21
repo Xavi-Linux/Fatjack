@@ -47,7 +47,7 @@ text{
     border-radius: 5%/40%;
     opacity: 0.8;
     z-index: 1;
-    max-width: 200px;
+    max-width: 220px;
 }
 .tooltip div {
     display: inline-block;

@@ -110,7 +110,11 @@
                             <select id="agents" form="agent_picker" autofocus class="dropdown">
                             <option value="" selected disabled hidden>Pick an agent!</option>
                             {% for agent in agents%}
-                            <option value={{agent}}>{{agent}}</option>
+                            <option value={{agent}}>TOP {{loop.index}}</option>
+                            
+                            {% endfor %}
+                            {% for other in others%}
+                            <option value={{other}}>{{other}}</option>
                             
                             {% endfor %}
                             </select>                    
