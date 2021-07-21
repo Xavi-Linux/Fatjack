@@ -1,14 +1,20 @@
-# Fatjack
+# Fatjack 
 ## An Introduction to reinforcement learning with blackjack game
 -----
-### Abstract
+## Abstract
 
 This repository aims to discuss the implementation of reinforcement learning algorithms to solve the casino game blackjack. It is also my Final
 Project for the Master in Data Science at KSchool.
 
-[Exploring on a graphical user environment](http://34.77.255.37)
+## You just feel curious and don't want to dwell on details too much...
 
-## Requirements and technical details:
+Then, go straight to the [Casino](http://34.77.255.37) and see how RL agents have fun there!
+
+The casino is intended to be intuitive. If you don't think it is, you'll find a user guide in the last section of the memorandum [../master/Memorandum.pdf].
+
+RL agents are tireless, so remember to press **Stop** to give the floor to different players!
+
+###Requirements and technical details:
 
 All you need to know or have when downloading this project is: 
 
@@ -24,4 +30,4 @@ HTML5, CSS, and Vanilla JavaScript powered by the D3 library (for plotting).
 7. **To make sure that the project properly runs, notebooks and folders must be at the same filesystem level. In other words, the Github repository
 structure must be exactly replicated on the local filesystem. Otherwise, notebooks cannot load the RL libraries.
 This requirement includes renaming neither folders nor files.** 
-8. Terminal commands must be executed from the root folder of the project.
+8. Terminal commands must be executed from the root folder of the project, the one containing the whole file structure presented in this repository.
