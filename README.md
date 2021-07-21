@@ -3,10 +3,6 @@
 -----
 ## Abstract
 
-<<<<<<< HEAD
-### Coming up soon..
-After knuckling down, I'm converting the game into a RL environment...
-=======
 This repository aims to discuss the implementation of reinforcement learning algorithms to solve the casino game blackjack. It is also my Final
 Project for the Master in Data Science at KSchool.
 
@@ -66,4 +62,4 @@ This requirement includes renaming neither folders nor files.**
 - Sarsa
 - Sarsa Lambda
 - Watkins Lambda
->>>>>>> dev
+
