@@ -48,11 +48,11 @@ This requirement includes renaming neither folders nor files.**
 - [stored_agents](../master/stored_agents): a bunch of binary files storing ready-to-be-deployed agents.
 - [tables](../master/tables): a bunch of binary files storing agents's Q/V-tables.
 - The notebooks: every notebooks follows the same structure:
-..* Goals: it is stated what the purpose of the notebook is and what should be achieved at the end of it. 
-..* Library importations: every library used throughout the notebook is declared beforehand. 
-..* Plot utilities: it exposes methods that help draw recurrent plots. 
-..* Experiment definition: it contains the methods that allow interaction between agents and environments.  
-..* Notebook-specific code: the necessary code execution is carried out to achieve the goals stated at the beginning of the notebook. 
+··* Goals: it is stated what the purpose of the notebook is and what should be achieved at the end of it. 
+··* Library importations: every library used throughout the notebook is declared beforehand. 
+··* Plot utilities: it exposes methods that help draw recurrent plots. 
+··* Experiment definition: it contains the methods that allow interaction between agents and environments.  
+··* Notebook-specific code: the necessary code execution is carried out to achieve the goals stated at the beginning of the notebook. 
 
 ### RL algorithms implemented
 
