@@ -8,11 +8,15 @@ Project for the Master in Data Science at KSchool.
 
 ## You just feel curious and don't want to dwell on details too much...
 
-Then, go straight to the [Casino](http://34.77.255.37) and see how RL agents have fun there!
+Then, go straight to the [Casino](http://34.77.255.37) and see how mortgage-free RL agents have mind-boggling fun there!
 
-The casino is intended to be intuitive. If you don't think it is, you'll find a user guide in the last section of the memorandum [../master/Memorandum.pdf].
+The casino is intended to be intuitive. If you don't think it is, you'll find a user guide in the last section of the [memorandum](../master/Memorandum.pdf).
 
-RL agents are tireless, so remember to press **Stop** to give the floor to different players!
+RL agents are tireless, so remember to press **Stop** button to give the floor to different players!
+
+## You have lately developed a geekish behaviour and delving into the project looks tempting...
+
+
 
 ###Requirements and technical details:
 
