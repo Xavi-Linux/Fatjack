@@ -16,11 +16,13 @@ RL agents are tireless, so remember to press **Stop** button to give the floor t
 
 ## You have lately developed a geekish behaviour and delving into the project looks tempting...
 
+Then, All in! Download and go for it!
 
+However, I **strongly** recommend that you first have a read through the [memorandum](../master/Memorandum.pdf) before executing the Notebooks attached herewith.
 
-###Requirements and technical details:
+### Requirements and technical details:
 
-All you need to know or have when downloading this project is: 
+All you need to have when downloading this project is: 
 
 1. A Miniconda/Anaconda package manager. 
 2. The project has been developed on an Ubuntu 20.04.2 LTS operating system,
@@ -35,3 +37,28 @@ HTML5, CSS, and Vanilla JavaScript powered by the D3 library (for plotting).
 structure must be exactly replicated on the local filesystem. Otherwise, notebooks cannot load the RL libraries.
 This requirement includes renaming neither folders nor files.** 
 8. Terminal commands must be executed from the root folder of the project, the one containing the whole file structure presented in this repository.
+
+### Project structure overview
+
+- [games](../master/games): It is a hand-made Python module that encapsulates the blackjack game logic.
+- [environments](../master/environments): It turns the blackjack game supplied by game module into a RL environment.
+- [agents](../master/agents): This module abstracts the algorithms and provide agents with some other persistence-oriented capabilities.
+- [interfaces](../master/interfaces): The web folder contains all necessary files to run the final data product as a web page.
+- [results](../master/results): a bunch of binary files storing agents’ results after their training.
+- [stored_agents](../master/stored_agents): a bunch of binary files storing ready-to-be-deployed agents.
+- [tables](../master/tables): a bunch of binary files storing agents's Q/V-tables.
+- The notebooks: every notebooks follows the same structure:
+..* Goals: it is stated what the purpose of the notebook is and what should be achieved at the end of it. 
+..* Library importations: every library used throughout the notebook is declared beforehand. 
+..* Plot utilities: it exposes methods that help draw recurrent plots. 
+..* Experiment definition: it contains the methods that allow interaction between agents and environments.  
+..* Notebook-specific code: the necessary code execution is carried out to achieve the goals stated at the beginning of the notebook. 
+
+### RL algorithms implemented
+
+- Every visit Montecarlo
+- Off Policy Montecarlo
+- QLearning
+- Sarsa
+- Sarsa Lambda
+- Watkins Lambda
