@@ -6,7 +6,7 @@
 This repository aims to discuss the implementation of reinforcement learning algorithms to solve the casino game blackjack. It is also my Final
 Project for the Master in Data Science at KSchool.
 
-[Exploring in a graphical user environment](http://34.77.255.37)
+[Exploring on a graphical user environment](http://34.77.255.37)
 
 ## Requirements and technical details:
 
@@ -19,8 +19,8 @@ but it is intended to be cross-platform for most of its operations, except for s
 Anyways, the notebooks are presented after execution and results can be perfectly read regardless of the OS. 
 4. The project is written in Python, except for the web-based front-end that has been written in
 HTML5, CSS, and Vanilla JavaScript powered by the D3 library (for plotting). 
-5. The Python version and third-party packages used are listed in hist-environment.yml file in the Github repository.  
-6. To create an environment with those libraries, execute on a terminal: `conda env create –f hist-environment.yml' **in the root folder of the project**. 
+5. The Python version and third-party packages used are listed in [hist-environment.yml](../blob/master/hist-environment.yml) file in the Github repository.  
+6. To create an environment with those libraries, execute on a terminal: `conda env create –f hist-environment.yml` **in the root folder of the project**. 
 7. **To make sure that the project properly runs, notebooks and folders must be at the same filesystem level. In other words, the Github repository
 structure must be exactly replicated on the local filesystem. Otherwise, notebooks cannot load the RL libraries.
 This requirement includes renaming neither folders nor files.** 
