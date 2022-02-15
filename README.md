@@ -8,7 +8,7 @@ Project for the Master in Data Science at KSchool.
 
 ## You just feel curious and don't want to dwell on details too much...
 
-Then, go straight to the [Casino](http://34.77.255.37) and see how mortgage-free RL agents have mind-boggling fun there!
+Then, go straight to the [Casino](https://fatjack-i2m4ubfh7a-ew.a.run.app) and see how mortgage-free RL agents have mind-boggling fun there!
 
 The casino is intended to be intuitive. If you don't think it is, you'll find a user guide in the last section of the [memorandum](../master/Memorandum.pdf).
 
